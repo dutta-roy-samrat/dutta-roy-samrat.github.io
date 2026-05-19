@@ -1,3 +1,68 @@
-theme: jekyll-theme-minimal
-title: Samrat's Blog
-description: Bookmark this to keep an eye on my project updates!
+# =============================================
+#   Site Settings
+# =============================================
+title: "My Dev Blog"
+description: "Thoughts on code, tools, and tech."
+author: "Samrat Dutta Roy"
+email: samratduttaroy008@example.com
+
+# Your GitHub Pages URL — change to match your repo
+# If using a custom domain, put it here instead
+url: "https://dutta-roy-samrat.github.io"
+baseurl: ""  # Leave empty if at root; use "/repo-name" if project page
+
+# =============================================
+#   Build Settings
+# =============================================
+theme: minima  # Default GitHub Pages theme — safe starting point
+markdown: kramdown
+highlighter: rouge  # Syntax highlighting for code blocks
+
+kramdown:
+  input: GFM              # GitHub Flavored Markdown
+  syntax_highlighter: rouge
+
+# =============================================
+#   Plugins (all supported by GitHub Pages)
+# =============================================
+plugins:
+  - jekyll-feed           # Generates /feed.xml for RSS readers
+  - jekyll-sitemap        # Generates /sitemap.xml for SEO
+  - jekyll-seo-tag        # Adds meta tags for SEO & social sharing
+
+# =============================================
+#   Permalink Style
+# =============================================
+permalink: /posts/:year/:month/:day/:title/
+
+# =============================================
+#   Collections & Defaults
+# =============================================
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+      author: "Samrat Dutta Roy"
+
+# =============================================
+#   Pagination (optional — remove if unused)
+# =============================================
+paginate: 5
+paginate_path: "/page/:num/"
+
+# =============================================
+#   Social / Footer Links
+# =============================================
+github_username: dutta-roy-samrat
+
+# =============================================
+#   Exclude from build output
+# =============================================
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - node_modules/
+  - vendor/
