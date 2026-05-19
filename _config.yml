@@ -4,31 +4,35 @@
 title: "My Dev Blog"
 description: "Thoughts on code, tools, and tech."
 author: "Samrat Dutta Roy"
-email: samratduttaroy008@example.com
+email: samratduttaroy008@gmail.com
 
-# Your GitHub Pages URL — change to match your repo
-# If using a custom domain, put it here instead
 url: "https://dutta-roy-samrat.github.io"
-baseurl: ""  # Leave empty if at root; use "/repo-name" if project page
+baseurl: ""
 
 # =============================================
 #   Build Settings
 # =============================================
-theme: minima  # Default GitHub Pages theme — safe starting point
+theme: minima
 markdown: kramdown
-highlighter: rouge  # Syntax highlighting for code blocks
+highlighter: rouge
 
 kramdown:
-  input: GFM              # GitHub Flavored Markdown
+  input: GFM
   syntax_highlighter: rouge
 
 # =============================================
-#   Plugins (all supported by GitHub Pages)
+#   Minima Theme Settings
+# =============================================
+minima:
+  skin: classic
+
+# =============================================
+#   Plugins
 # =============================================
 plugins:
-  - jekyll-feed           # Generates /feed.xml for RSS readers
-  - jekyll-sitemap        # Generates /sitemap.xml for SEO
-  - jekyll-seo-tag        # Adds meta tags for SEO & social sharing
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
 
 # =============================================
 #   Permalink Style
@@ -36,7 +40,7 @@ plugins:
 permalink: /posts/:year/:month/:day/:title/
 
 # =============================================
-#   Collections & Defaults
+#   Post Defaults
 # =============================================
 defaults:
   - scope:
@@ -47,18 +51,20 @@ defaults:
       author: "Samrat Dutta Roy"
 
 # =============================================
-#   Pagination (optional — remove if unused)
+#   Pagination
 # =============================================
 paginate: 5
 paginate_path: "/page/:num/"
 
 # =============================================
-#   Social / Footer Links
+#   Social Links
 # =============================================
 github_username: dutta-roy-samrat
+# twitter_username: yourhandle   # uncomment if needed
+# linkedin_username: yourhandle  # uncomment if needed
 
 # =============================================
-#   Exclude from build output
+#   Exclude from build
 # =============================================
 exclude:
   - Gemfile
