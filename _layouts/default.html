@@ -374,9 +374,7 @@
       
       window.addEventListener('keydown', (e) => {
         if (e.code === 'Space' || e.code === 'ArrowUp') {
-          if (state === 'PLAYING') {
-            e.preventDefault();
-          }
+          e.preventDefault(); // Always prevent default scroll behaviors for Space/ArrowUp to avoid browser scrolling down on game start/jump
           triggerAction();
         }
       });

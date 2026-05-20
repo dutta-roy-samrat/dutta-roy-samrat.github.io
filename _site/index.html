@@ -20,7 +20,7 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"WebSite","author":{"@type":"Person","name":"Samrat Dutta Roy"},"description":"Thoughts on code, tools, and tech.","headline":"Samrat Dutta Roy","name":"My Dev Blog","url":"https://dutta-roy-samrat.github.io/"}</script>
 <!-- End Jekyll SEO tag -->
-<link rel="stylesheet" href="/assets/main.css?v=20260520081012"><link type="application/atom+xml" rel="alternate" href="https://dutta-roy-samrat.github.io/feed.xml" title="My Dev Blog" /><link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="/assets/main.css?v=20260520082148"><link type="application/atom+xml" rel="alternate" href="https://dutta-roy-samrat.github.io/feed.xml" title="My Dev Blog" /><link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
@@ -571,9 +571,7 @@
       
       window.addEventListener('keydown', (e) => {
         if (e.code === 'Space' || e.code === 'ArrowUp') {
-          if (state === 'PLAYING') {
-            e.preventDefault();
-          }
+          e.preventDefault(); // Always prevent default scroll behaviors for Space/ArrowUp to avoid browser scrolling down on game start/jump
           triggerAction();
         }
       });
