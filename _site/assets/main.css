@@ -259,9 +259,24 @@ body { background-color: var(--bg); color: var(--text); font-family: 'Inter', -a
 .theme-toggle-btn svg { width: 18px; height: 18px; }
 
 /* ── Cover Image ────────────────────────────────────────────────────────── */
-.notion-cover-wrapper { width: 100%; height: 25vh; min-height: 180px; max-height: 280px; overflow: hidden; position: relative; background-color: var(--bg-sidebar); }
+.notion-cover-wrapper { width: 100%; height: 25vh; min-height: 180px; max-height: 280px; overflow: hidden; position: relative; background-color: #5c94fc !important; /* Original Mario NES Sky Blue */ }
 
-.notion-cover-img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; }
+.notion-cover-img { display: none !important; /* Completely hide/remove the anime image as requested */ }
+
+.mario-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; cursor: pointer; background-color: transparent; }
+
+/* Retro arcade play/stop control button styles */
+.mario-controls { position: absolute; top: 12px; right: 12px; display: flex; gap: 8px; z-index: 10; }
+
+.mario-btn { background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); color: #fff; border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 4px; padding: 4px 10px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: 'Inter', -apple-system, sans-serif; transition: all 0.2s; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); text-transform: uppercase; letter-spacing: 0.5px; }
+
+.mario-btn:hover { background-color: #e52521 !important; /* Mario Red */ border-color: #ff3823 !important; transform: translateY(-1px); }
+
+.mario-btn:active { transform: translateY(0); }
+
+.mario-play-hint { position: absolute; bottom: 12px; right: 12px; background-color: rgba(0, 0, 0, 0.75); backdrop-filter: blur(4px); color: #fff !important; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 600; z-index: 3; pointer-events: none; font-family: 'Inter', -apple-system, sans-serif; letter-spacing: 0.5px; transition: opacity 0.3s, transform 0.2s; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); text-transform: uppercase; border: 1px solid rgba(255, 255, 255, 0.15); }
+
+.notion-cover-wrapper:hover .mario-play-hint { transform: translateY(-2px); }
 
 /* ── Content Layout Container ───────────────────────────────────────────── */
 .notion-container { width: 100%; max-width: 900px; margin: 0 auto; padding: 0 54px 100px; }
@@ -269,7 +284,7 @@ body { background-color: var(--bg); color: var(--text); font-family: 'Inter', -a
 @media screen and (max-width: 768px) { .notion-container { padding: 0 24px 60px; } }
 .notion-page-header-section { position: relative; height: 38px; margin-bottom: 24px; }
 
-.notion-page-icon { position: absolute; top: -55px; left: 0; font-size: 78px; line-height: 1; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; user-select: none; transition: transform 0.2s ease; }
+.notion-page-icon { position: absolute; top: -15px; /* Shifted down to not hinder the Mario canvas game */ left: 0; font-size: 78px; line-height: 1; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; user-select: none; transition: transform 0.2s ease; }
 
 .notion-page-icon:hover { transform: scale(1.05); }
 
@@ -342,7 +357,7 @@ a:hover { text-decoration-color: var(--text); }
 
 .notion-gallery-card:hover .notion-card-icon { color: var(--text); }
 
-.notion-card-icon svg { width: 100%; height: 100%; fill: currentColor; }
+.notion-card-icon svg { width: 100%; height: 100%; }
 
 .notion-card-label { font-weight: 600; font-size: 14px; color: var(--text); }
 
@@ -457,7 +472,7 @@ blockquote p { margin-bottom: 0; }
 .notion-post-content tr:hover td { background-color: var(--hover-bg) !important; }
 
 /* ── Footer ─────────────────────────────────────────────────────────────── */
-.notion-footer { margin-top: 80px; }
+.notion-footer { margin-top: 80px; padding-bottom: 60px; /* Added elegant padding below the footer as requested */ }
 
 .footer-divider { width: 100%; height: 1px; background-color: var(--border); margin-bottom: 20px; }
 
@@ -470,3 +485,47 @@ blockquote p { margin-bottom: 0; }
 .footer-right a:hover { color: var(--text); text-decoration: underline; }
 
 @media screen and (max-width: 580px) { .footer-content { flex-direction: column; gap: 12px; align-items: flex-start; } }
+/* ── Mobile Layout & Design Adjustments ────────────────────────────────────── */
+@media screen and (max-width: 768px) { .mobile-hide { display: none !important; }
+  .notion-container { padding: 0 16px 60px !important; }
+  .notion-page-icon { font-size: 64px !important; top: -10px !important; /* Shifter lower to avoid game overlap */ }
+  /* Limit current-page breadcrumb width on mobile to prevent pushing nav elements out of viewport */
+  .crumb.current-page { max-width: 110px !important; }
+  /* Mobile scaling for cover game overlays */
+  .mario-controls { top: 8px !important; right: 8px !important; gap: 6px !important; }
+  .mario-btn { padding: 3px 6px !important; font-size: 10px !important; }
+  .mario-play-hint { font-size: 9px !important; padding: 4px 8px !important; bottom: 8px !important; right: 8px !important; }
+  /* Robust word-wrapping overrides to prevent text overflow on mobile screens */
+  h1, h2, h3, h4, h5, h6, .developer-title, .post-title { word-wrap: break-word !important; overflow-wrap: break-word !important; word-break: break-word !important; white-space: normal !important; } }
+@media screen and (max-width: 600px) { /* Developer Hero Title */
+  .developer-title { font-size: 30px !important; }
+  /* Core Tech Stack: Columns of 2 in each row + square boxes */
+  .notion-gallery-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+  .notion-gallery-card { aspect-ratio: 1 / 1 !important; padding: 12px !important; gap: 8px !important; justify-content: center !important; }
+  .notion-card-icon { width: 40px !important; height: 40px !important; }
+  .notion-card-label { font-size: 13px !important; font-weight: 500 !important; }
+  /* Database table view: Turn into card-based List View without horizontal scroll */
+  .notion-table-view { border: none !important; background: transparent !important; box-shadow: none !important; overflow-x: visible !important; }
+  .notion-table { display: block !important; border: none !important; background: transparent !important; width: 100% !important; }
+  .notion-table thead { display: none !important; }
+  .notion-table tbody { display: block !important; width: 100% !important; }
+  .notion-table tr { display: flex !important; flex-direction: column !important; align-items: flex-start !important; padding: 14px 16px !important; margin-bottom: 12px !important; background-color: var(--card-bg) !important; border: 1px solid var(--border) !important; border-radius: 8px !important; gap: 8px !important; box-shadow: var(--shadow-sm) !important; transition: background-color 0.2s ease, border-color 0.2s ease; width: 100% !important; box-sizing: border-box !important; }
+  .notion-table tr:hover { background-color: var(--hover-bg) !important; border-color: var(--border-hover) !important; }
+  .notion-table td { display: block !important; width: 100% !important; padding: 0 !important; border: none !important; background: transparent !important; word-wrap: break-word !important; overflow-wrap: break-word !important; word-break: break-word !important; white-space: normal !important; }
+  .notion-table-title-link { display: inline-flex !important; flex-wrap: wrap !important; word-wrap: break-word !important; overflow-wrap: break-word !important; word-break: break-word !important; white-space: normal !important; width: 100% !important; }
+  .notion-table td:nth-child(1) { font-size: 15px !important; font-weight: 600 !important; word-wrap: break-word !important; overflow-wrap: break-word !important; word-break: break-word !important; white-space: normal !important; }
+  .notion-table td:nth-child(2) { font-size: 12px !important; color: var(--text-muted) !important; }
+  .notion-table td:nth-child(3) { margin-top: 4px !important; }
+  .notion-table td:nth-child(4) { display: none !important; /* Hide Published tag to save space */ }
+  /* Properties grid on blog posts */
+  .notion-properties-grid { grid-template-columns: 1fr !important; row-gap: 12px !important; column-gap: 0 !important; }
+  .notion-property-row { display: flex !important; flex-direction: column !important; align-items: flex-start !important; gap: 4px !important; }
+  .notion-property-label { min-width: unset !important; width: 100% !important; }
+  /* Post content tables: clean responsive scrollable cards that never overflow or cause page-level horizontal wobble */
+  .notion-page-content table { display: block !important; width: 100% !important; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; border-collapse: collapse !important; margin: 20px 0 !important; border: 1px solid var(--border) !important; border-radius: 8px !important; background-color: var(--card-bg) !important; }
+  .notion-page-content table thead { display: table-header-group !important; }
+  .notion-page-content table tbody { display: table-row-group !important; }
+  .notion-page-content table tr { display: table-row !important; background: transparent !important; }
+  .notion-page-content table tr:nth-child(even) { background-color: var(--bg-sidebar) !important; }
+  .notion-page-content table th, .notion-page-content table td { display: table-cell !important; padding: 10px 14px !important; border: 1px solid var(--border) !important; font-size: 13.5px !important; line-height: 1.5 !important; white-space: nowrap !important; color: var(--text) !important; }
+  .notion-page-content table th { font-weight: 600 !important; background-color: var(--bg-sidebar) !important; color: var(--text-muted) !important; } }

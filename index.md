@@ -70,30 +70,45 @@ cover_image: "/assets/images/notion-cover.png"
   </div>
   <div class="notion-gallery-card">
     <span class="notion-card-icon">
-      <svg viewBox="0 0 24 24" fill="#764abc">
-        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+      <svg viewBox="0 0 24 24" fill="none" stroke="#764abc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 2 7 12 12 22 7 12 2" fill="#764abc" fill-opacity="0.25"/>
+        <polyline points="2 17 12 22 22 17"/>
+        <polyline points="2 12 12 17 22 12"/>
       </svg>
     </span>
     <span class="notion-card-label">Redux Toolkit</span>
   </div>
   <div class="notion-gallery-card">
     <span class="notion-card-icon">
-      <svg viewBox="0 0 24 24">
+      <svg viewBox="0 0 24 24" fill="none">
         <defs>
-          <linearGradient id="queryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id="rqGrad" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stop-color="#ff4154" />
+            <stop offset="50%" stop-color="#ff7e40" />
             <stop offset="100%" stop-color="#ffb300" />
           </linearGradient>
         </defs>
-        <path fill="url(#queryGrad)" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14.5h-2v-2h2v2zm0-3.5h-2V7h2v6z"/>
+        <circle cx="12" cy="12" r="8" fill="url(#rqGrad)" fill-opacity="0.15" stroke="url(#rqGrad)" stroke-width="2"/>
+        <path d="M12 5c-3.87 0-7 3.13-7 7s3.13 7 7 7 7-3.13 7-7-3.13-7-7-7zm0 12c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" fill="url(#rqGrad)"/>
+        <circle cx="12" cy="12" r="2.5" fill="#fff" stroke="url(#rqGrad)" stroke-width="1"/>
       </svg>
     </span>
     <span class="notion-card-label">React Query</span>
   </div>
   <div class="notion-gallery-card">
     <span class="notion-card-icon">
-      <svg viewBox="0 0 24 24" fill="#e10098">
-        <path d="M12 22.75l-9.25-5.34V6.59L12 1.25l9.25 5.34v10.82L12 22.75zm-7.75-6.19l7.75 4.47 7.75-4.47V7.45L12 2.98 4.25 7.45v9.11zM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/>
+      <svg viewBox="0 0 24 24" fill="none">
+        <polygon points="12 2 20.66 7 20.66 17 12 22 3.34 17 3.34 7" stroke="#e10098" stroke-width="2.5" stroke-linejoin="round" fill="#e10098" fill-opacity="0.15"/>
+        <line x1="12" y1="2" x2="12" y2="22" stroke="#e10098" stroke-width="1.5"/>
+        <line x1="3.34" y1="7" x2="20.66" y2="17" stroke="#e10098" stroke-width="1.5"/>
+        <line x1="3.34" y1="17" x2="20.66" y2="7" stroke="#e10098" stroke-width="1.5"/>
+        <circle cx="12" cy="2" r="2" fill="#e10098"/>
+        <circle cx="20.66" cy="7" r="2" fill="#e10098"/>
+        <circle cx="20.66" cy="17" r="2" fill="#e10098"/>
+        <circle cx="12" cy="22" r="2" fill="#e10098"/>
+        <circle cx="3.34" cy="17" r="2" fill="#e10098"/>
+        <circle cx="3.34" cy="7" r="2" fill="#e10098"/>
+        <circle cx="12" cy="12" r="3.5" fill="#e10098" stroke="#1c1c1c" stroke-width="1.5"/>
       </svg>
     </span>
     <span class="notion-card-label">GraphQL</span>
@@ -114,8 +129,10 @@ cover_image: "/assets/images/notion-cover.png"
   </div>
   <div class="notion-gallery-card">
     <span class="notion-card-icon">
-      <svg viewBox="0 0 24 24" fill="#339933">
-        <path d="M12 2L2 7.75v10.5L12 24l10-5.75v-10.5L12 2zm8 15.12l-8 4.6-8-4.6v-9.24l8-4.6 8 4.6v9.24z"/>
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L4 6.5v11L12 22l8-4.5v-11L12 2z" fill="#43853d"/>
+        <path d="M12 2L4 6.5v11L12 22V12c1.65 0 3-1.35 3-3s-1.35-3-3-3V2z" fill="#7fc724"/>
+        <path d="M12 12c1.65 0 3-1.35 3-3s-1.35-3-3-3v6z" fill="#43853d"/>
       </svg>
     </span>
     <span class="notion-card-label">Node.js</span>
