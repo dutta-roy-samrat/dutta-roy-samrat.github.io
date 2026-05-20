@@ -3,6 +3,8 @@ layout: default
 title: "Samrat Dutta Roy"
 emoji: "🚀"
 cover_image: "/assets/images/notion-cover.png"
+description: "Senior Frontend Engineer specializing in engineering high-performance, accessible, and elegant web applications. Read technical deep-dives on frontend architecture, browser engines, and system performance."
+keywords: [samrat dutta roy, portfolio, frontend engineer, software engineer, tech blog, dev blog, react, performance optimization, javascript, system design]
 ---
 
 <!-- Page Header / Bio Section -->

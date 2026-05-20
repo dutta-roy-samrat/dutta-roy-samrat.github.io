@@ -3,6 +3,7 @@
 # =============================================
 title: "My Dev Blog"
 description: "Thoughts on code, tools, and tech."
+keywords: [dev blog, web performance, software engineering, frontend development, browser internals, javascript, system design]
 author: "Samrat Dutta Roy"
 email: samratduttaroy008@gmail.com
 
@@ -15,6 +16,9 @@ baseurl: ""
 theme: minima
 markdown: kramdown
 highlighter: rouge
+
+sass:
+  style: compressed
 
 kramdown:
   input: GFM
