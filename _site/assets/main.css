@@ -250,6 +250,8 @@ body { background-color: var(--bg); color: var(--text); font-family: 'Inter', -a
 
 .nav-link:hover { color: var(--text) !important; background-color: var(--hover-bg) !important; }
 
+.nav-link.active { text-decoration: underline !important; text-decoration-color: var(--text) !important; text-underline-offset: 6px; text-decoration-thickness: 2px; color: var(--text) !important; font-weight: 600; }
+
 .theme-toggle-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: color 0.2s, background-color 0.2s; }
 
 .theme-toggle-btn:hover { color: var(--text); background-color: var(--hover-bg); }

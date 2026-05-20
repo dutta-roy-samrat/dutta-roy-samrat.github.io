@@ -251,6 +251,15 @@ body {
   background-color: var(--hover-bg) !important;
 }
 
+.nav-link.active {
+  text-decoration: underline !important;
+  text-decoration-color: var(--text) !important;
+  text-underline-offset: 6px;
+  text-decoration-thickness: 2px;
+  color: var(--text) !important;
+  font-weight: 600;
+}
+
 .theme-toggle-btn {
   background: none;
   border: none;
