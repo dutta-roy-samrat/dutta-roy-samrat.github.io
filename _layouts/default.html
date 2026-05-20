@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {%- seo -%}
+  <link rel="stylesheet" href="{{ "/assets/main.css" | relative_url }}?v={{ site.time | date: '%Y%m%d%H%M%S' }}">
+  {%- feed_meta -%}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Sticky Navigation / Breadcrumbs -->
+  <header class="notion-navbar">
+    <div class="notion-navbar-container">
+      <div class="notion-breadcrumbs">
+        <a href="{{ '/' | relative_url }}" class="crumb-link">
+          <span class="crumb">📂 Samrat Dutta Roy</span>
+        </a>
+        {% if page.layout == 'post' %}
+          <span class="divider">/</span>
+          <span class="crumb text-muted">📝 Posts</span>
+          <span class="divider">/</span>
+          <span class="crumb current-page">{{ page.title }}</span>
+        {% else %}
+          <span class="divider">/</span>
+          <span class="crumb current-page">🏠 Homepage</span>
+        {% endif %}
+      </div>
+      
+      <div class="notion-nav-actions">
+        <a href="{{ '/' | relative_url }}" class="nav-link">Home</a>
+        <a href="https://github.com/dutta-roy-samrat" target="_blank" rel="noopener noreferrer" class="nav-link">GitHub</a>
+        <a href="https://linkedin.com/in/samrat-dutta-roy-032a86194" target="_blank" rel="noopener noreferrer" class="nav-link">LinkedIn</a>
+        <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme">
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notion Cover Banner -->
+  <div class="notion-cover-wrapper">
+    {% if page.cover_image %}
+      <img src="{{ page.cover_image | relative_url }}" class="notion-cover-img" alt="Cover banner">
+    {% else %}
+      <img src="{{ '/assets/images/notion-cover.png' | relative_url }}" class="notion-cover-img" alt="Cover banner">
+    {% endif %}
+  </div>
+
+  <!-- Main Content Container -->
+  <div class="notion-container">
+    <div class="notion-page-header-section">
+      <div class="notion-page-icon">
+        {% if page.emoji %}
+          {{ page.emoji }}
+        {% else %}
+          🚀
+        {% endif %}
+      </div>
+    </div>
+    
+    <main class="notion-content-area" aria-label="Content">
+      {{ content }}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="notion-footer">
+      <div class="footer-divider"></div>
+      <div class="footer-content">
+        <p class="footer-left">© {{ site.time | date: "%Y" }} Samrat Dutta Roy. Built in Notion style.</p>
+        <div class="footer-right">
+          <a href="https://github.com/dutta-roy-samrat" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="https://linkedin.com/in/samrat-dutta-roy-032a86194" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Persistent Light/Dark Mode Logic -->
+  <script>
+    (function() {
+      const toggle = document.getElementById('theme-toggle');
+      const moonIcon = document.querySelector('.moon-icon');
+      const sunIcon = document.querySelector('.sun-icon');
+      
+      function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        
+        if (theme === 'dark') {
+          moonIcon.style.display = 'none';
+          sunIcon.style.display = 'block';
+        } else {
+          moonIcon.style.display = 'block';
+          sunIcon.style.display = 'none';
+        }
+      }
+      
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+      
+      setTheme(initialTheme);
+      
+      toggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        setTheme(nextTheme);
+      });
+    })();
+  </script>
+</body>
+</html>

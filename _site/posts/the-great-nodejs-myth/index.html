@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>The Great Node.js Myth: Is It Really Single-Threaded? | My Dev Blog</title>
+<meta name="generator" content="Jekyll v3.9.5" />
+<meta property="og:title" content="The Great Node.js Myth: Is It Really Single-Threaded?" />
+<meta name="author" content="Samrat Dutta Roy" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="JavaScript execution in Node.js is single-threaded, but Node.js as a runtime is multi-threaded. Here’s what that actually means." />
+<meta property="og:description" content="JavaScript execution in Node.js is single-threaded, but Node.js as a runtime is multi-threaded. Here’s what that actually means." />
+<link rel="canonical" href="http://0.0.0.0:3031/posts/the-great-nodejs-myth/" />
+<meta property="og:url" content="http://0.0.0.0:3031/posts/the-great-nodejs-myth/" />
+<meta property="og:site_name" content="My Dev Blog" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-05-20T00:00:00+05:30" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="The Great Node.js Myth: Is It Really Single-Threaded?" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Samrat Dutta Roy"},"dateModified":"2026-05-20T00:00:00+05:30","datePublished":"2026-05-20T00:00:00+05:30","description":"JavaScript execution in Node.js is single-threaded, but Node.js as a runtime is multi-threaded. Here’s what that actually means.","headline":"The Great Node.js Myth: Is It Really Single-Threaded?","mainEntityOfPage":{"@type":"WebPage","@id":"http://0.0.0.0:3031/posts/the-great-nodejs-myth/"},"url":"http://0.0.0.0:3031/posts/the-great-nodejs-myth/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css?v=20260520055939"><link type="application/atom+xml" rel="alternate" href="http://0.0.0.0:3031/feed.xml" title="My Dev Blog" /><link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Sticky Navigation / Breadcrumbs -->
+  <header class="notion-navbar">
+    <div class="notion-navbar-container">
+      <div class="notion-breadcrumbs">
+        <a href="/" class="crumb-link">
+          <span class="crumb">📂 Samrat Dutta Roy</span>
+        </a>
+        
+          <span class="divider">/</span>
+          <span class="crumb text-muted">📝 Posts</span>
+          <span class="divider">/</span>
+          <span class="crumb current-page">The Great Node.js Myth: Is It Really Single-Threaded?</span>
+        
+      </div>
+      
+      <div class="notion-nav-actions">
+        <a href="/" class="nav-link">Home</a>
+        <a href="https://github.com/dutta-roy-samrat" target="_blank" rel="noopener noreferrer" class="nav-link">GitHub</a>
+        <a href="https://linkedin.com/in/samrat-dutta-roy-032a86194" target="_blank" rel="noopener noreferrer" class="nav-link">LinkedIn</a>
+        <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme">
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notion Cover Banner -->
+  <div class="notion-cover-wrapper">
+    
+      <img src="/assets/images/notion-cover.png" class="notion-cover-img" alt="Cover banner">
+    
+  </div>
+
+  <!-- Main Content Container -->
+  <div class="notion-container">
+    <div class="notion-page-header-section">
+      <div class="notion-page-icon">
+        
+          🚀
+        
+      </div>
+    </div>
+    
+    <main class="notion-content-area" aria-label="Content">
+      <article class="notion-post">
+  <!-- Post Title -->
+  <h1 class="notion-post-title">The Great Node.js Myth: Is It Really Single-Threaded?</h1>
+  
+  <!-- Notion Page Properties Grid -->
+  <div class="notion-properties-grid">
+    <!-- Date Property -->
+    <div class="notion-property-row">
+      <div class="notion-property-label">
+        <svg viewBox="0 0 24 24" class="property-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        Date
+      </div>
+      <div class="notion-property-value">
+        <span class="property-date">May 20, 2026</span>
+      </div>
+    </div>
+    
+    <!-- Tags Property -->
+    
+    <div class="notion-property-row">
+      <div class="notion-property-label">
+        <svg viewBox="0 0 24 24" class="property-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+          <line x1="7" y1="7" x2="7.01" y2="7"></line>
+        </svg>
+        Tags
+      </div>
+      <div class="notion-property-value">
+        <div class="notion-tags-container">
+          
+            
+            
+            
+            <span class="notion-tag pastel-green">nodejs</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-blue">backend</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-yellow">javascript</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-purple">architecture</span>
+          
+        </div>
+      </div>
+    </div>
+    
+    
+    <!-- Author Property -->
+    <div class="notion-property-row">
+      <div class="notion-property-label">
+        <svg viewBox="0 0 24 24" class="property-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        Author
+      </div>
+      <div class="notion-property-value">
+        <span class="property-author">Samrat Dutta Roy</span>
+      </div>
+    </div>
+    
+    <!-- Status Property -->
+    <div class="notion-property-row">
+      <div class="notion-property-label">
+        <svg viewBox="0 0 24 24" class="property-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        Status
+      </div>
+      <div class="notion-property-value">
+        <span class="notion-tag pastel-green font-medium">Published</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="notion-property-divider"></div>
+  
+  <!-- Post Content -->
+  <div class="notion-post-content">
+    <p>“Is Node.js single-threaded?”</p>
+
+<p>If you’ve ever sat through a backend engineering interview, you’ve probably faced this classic trap. If you confidently answer “yes,” you’re wrong. If you answer “no,” you’re also wrong.</p>
+
+<p>The highly accurate way to phrase it is: <strong>JavaScript execution in Node.js is single-threaded, but Node.js as a runtime environment is multi-threaded.</strong></p>
+
+<blockquote>
+  <p><em>This deep dive is the direct product of a rabbit hole of pure curiosity — hours spent grilling an AI collaborator, asking question after question to dissect the exact boundaries of where software thread pools meet physical CPU hardware cores.</em></p>
+</blockquote>
+
+<hr />
+
+<h2 id="1-the-single-threaded-part-the-main-thread">1. The Single-Threaded Part: The Main Thread</h2>
+
+<p>When you write standard JavaScript code in Node.js, it executes on a single <strong>Main Thread</strong>.</p>
+
+<ul>
+  <li>There is only one <strong>Call Stack</strong>.</li>
+  <li>There is only one <strong>Event Loop</strong>.</li>
+  <li>Only one line of your JavaScript code runs at any given physical microsecond.</li>
+</ul>
+
+<p>Think of the Main Thread as a restaurant host standing at the front door. The host takes incoming customer orders (HTTP requests) and hands them off. As long as the tasks are light, a single host can handle thousands of guests an hour.</p>
+
+<p>But what happens if a guest asks the host to personally cook a complex, time-consuming meal right there at the podium? That is a <strong>synchronous, CPU-heavy task</strong> (like a massive <code class="language-plaintext highlighter-rouge">while</code> loop, complex image processing, or heavy mathematical calculation).</p>
+
+<p>The host is now completely core-locked. The front door freezes. Every other user trying to visit your site will hit an infinite loading screen because the single Event Loop is completely blocked.</p>
+
+<hr />
+
+<h2 id="2-the-multi-threaded-underbelly-enter-libuv">2. The Multi-Threaded Underbelly: Enter <code class="language-plaintext highlighter-rouge">libuv</code></h2>
+
+<p>If Node.js execution is single-threaded, how can it query a database, read a file, and handle network traffic all at the same time without freezing?</p>
+
+<p>Under the hood, Node.js is a combination of Google’s V8 engine and a powerful C++ library called <strong>libuv</strong>. When you request an asynchronous, I/O-bound operation (like <code class="language-plaintext highlighter-rouge">fs.readFile</code> or a crypto function), Node.js doesn’t execute it on the main thread. Instead, it offloads it to libuv.</p>
+
+<p>Libuv maintains a hidden background <strong>Thread Pool</strong> (which defaults to 4 threads).</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>📦 MAIN THREAD (Event Loop) ──[ hands off I/O task ]──&gt; ⚙️ libuv THREAD POOL (4 Threads)
+           │                                                        │
+     (Stays Free!)                                            (Handles OS File/Crypto)
+           ▼                                                        ▼
+🟢 Ready for next request!                                    🎉 Pushes callback to queue
+</code></pre></div></div>
+
+<p>The background thread handles the heavy physical lifting from the Operating System. Once the data is retrieved, the background thread pushes the result into the Callback Queue, and the Event Loop eventually picks it up to execute the callback on the main thread.</p>
+
+<hr />
+
+<h2 id="3-true-javascript-parallelism-worker-threads">3. True JavaScript Parallelism: Worker Threads</h2>
+
+<p>What if your bottleneck isn’t an I/O task? What if you genuinely need to run a massive JavaScript calculation without blocking your web server? Because libuv only handles background system I/O, it won’t help you run synchronous JavaScript code in parallel.</p>
+
+<p>For this, Node.js provides <strong>Worker Threads</strong> (<code class="language-plaintext highlighter-rouge">worker_threads</code>).</p>
+
+<p>Worker Threads let you spin up a completely isolated V8 engine and Call Stack inside your existing application process. You pass the heavy <code class="language-plaintext highlighter-rouge">while</code> loop to a Worker, and the Operating System’s scheduler automatically assigns that thread to a completely separate, idle CPU core.</p>
+
+<ul>
+  <li><strong>The Core Benefit:</strong> Your Main Thread returns to 0% utilization instantly, continuing to serve incoming web traffic.</li>
+  <li><strong>The Resource Share:</strong> Because Worker Threads stay inside the <em>same</em> system process, they don’t require heavy system overhead. They can even share raw memory blocks instantly using <code class="language-plaintext highlighter-rouge">SharedArrayBuffer</code> without the latency of cloning data back and forth.</li>
+</ul>
+
+<hr />
+
+<h2 id="4-scaling-the-entire-server-the-cluster-module">4. Scaling the Entire Server: The Cluster Module</h2>
+
+<p>Worker Threads are fantastic when a single user asks your app to do a highly difficult calculation. But what if your tasks are simple, yet <strong>10,000 users</strong> rush your API at the exact same second?</p>
+
+<p>Even if your code is asynchronous, a single Main Thread cannot physically parse 10,000 JSON payloads or validate 10,000 auth tokens fast enough. The CPU core running your app will hit 100% simply from the sheer volume of network throughput.</p>
+
+<p>To scale across this bottleneck, we use the <strong>Cluster Module</strong>.</p>
+
+<p>Instead of creating small threads inside one app, Cluster duplicates your entire Node.js application process. If you deploy to an 8-core machine, Cluster forks your app 8 times. You now have 8 completely independent server instances, each running its own isolated memory and Event Loop.</p>
+
+<p>A master process binds to your main network port (e.g., Port 3000) and acts as a built-in load balancer, distributing incoming traffic across all 8 cores using a Round-Robin algorithm. If one instance encounters an unhandled crash or gets temporarily frozen, the other 7 keep running smoothly.</p>
+
+<hr />
+
+<h2 id="5-the-hardware-reality--the-mathematical-trap">5. The Hardware Reality &amp; The Mathematical Trap</h2>
+
+<p>Hardware is finite. If your machine has 4 physical CPU cores, it can only execute 4 tasks at the exact same physical millisecond. This is <strong>True Parallelism</strong>.</p>
+
+<p>If your CPU cores are fully occupied and you try to force more heavy threads onto the system, the Operating System steps in to enforce <strong>Concurrency via Context Switching (Time-Slicing)</strong>. The CPU core runs Thread 1 for a few microseconds, pauses, saves its state to memory, loads Thread 2, runs it, and switches back.</p>
+
+<p>This swapping happens so fast it looks simultaneous to a human, but it introduces an incredibly expensive performance penalty. If you overwhelm your hardware, the CPU spends more time swapping memory states than actually computing your code.</p>
+
+<h3 id="the-trap-scenario">The Trap Scenario</h3>
+
+<p>Imagine you have an <strong>8-core server</strong>. You want to handle massive web traffic, so you use clustering to spawn <strong>8 instances</strong>. However, you also have a heavy reporting feature, so you configure a <strong>Worker Thread Pool of 4</strong> in your code.</p>
+
+<p>Because Cluster duplicates your entire codebase, it also duplicates your worker configuration. You haven’t created 4 background threads — you have created:</p>
+
+<p><strong>8 Cluster Instances × 4 Worker Threads = 32 Active Threads</strong></p>
+
+<p>You now have 32 aggressive software threads violently fighting over 8 physical hardware cores. Your system will grind to a chaotic halt.</p>
+
+<h3 id="best-practices-for-cpu-budgeting">Best Practices for CPU Budgeting</h3>
+
+<ol>
+  <li><strong>Never Spawn Threads Dynamically:</strong> Avoid initializing <code class="language-plaintext highlighter-rouge">new Worker()</code> inside an active route handler. Instead, define a fixed, static pool of workers at startup that sit idle and wait for tasks.</li>
+  <li><strong>Leave Room on the Machine:</strong> Use the formula: <code class="language-plaintext highlighter-rouge">(Total Clusters) + (Total Active Worker Threads) &lt;= Total Physical Cores</code>.</li>
+  <li><strong>The Microservices Escape Hatch:</strong> Point network traffic to a <strong>Web Server Machine</strong> scaled via clusters, and offload heavy tasks to a background <strong>Worker Machine</strong> via a message broker like Redis, RabbitMQ, or BullMQ.</li>
+</ol>
+
+<hr />
+
+<h2 id="6-deployment-strategy-pm2-vs-aws-load-balancers">6. Deployment Strategy: PM2 vs. AWS Load Balancers</h2>
+
+<h3 id="pm2-process-manager-2">PM2 (Process Manager 2)</h3>
+
+<p>PM2 is software installed directly onto a Virtual Private Server. It wraps around your Node.js script to provide process reliability.</p>
+
+<ul>
+  <li>Automatically handles the Cluster Module (<code class="language-plaintext highlighter-rouge">pm2 start app.js -i max</code>)</li>
+  <li>Restarts crashed instances in milliseconds</li>
+  <li>Provides rolling, zero-downtime updates (<code class="language-plaintext highlighter-rouge">pm2 reload</code>)</li>
+  <li>Generates system startup scripts so your app survives server reboots</li>
+</ul>
+
+<h3 id="aws-application-load-balancer-alb">AWS Application Load Balancer (ALB)</h3>
+
+<p>An AWS Load Balancer lives completely outside your servers. Its sole job is to distribute global internet traffic across <strong>multiple completely separate physical machines or Docker containers</strong>.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>PM2</th>
+      <th>AWS Load Balancer</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Where it scales</strong></td>
+      <td>Inside a single machine</td>
+      <td>Across multiple machines</td>
+    </tr>
+    <tr>
+      <td><strong>Best for</strong></td>
+      <td>VPS / bare-metal Linux</td>
+      <td>Cloud-native / containerized</td>
+    </tr>
+    <tr>
+      <td><strong>Blast Radius</strong></td>
+      <td>Whole app down if host dies</td>
+      <td>Traffic reroutes if one machine dies</td>
+    </tr>
+    <tr>
+      <td><strong>State</strong></td>
+      <td>Easier on single machine</td>
+      <td>Requires stateless architecture</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="the-ultimate-production-blueprint">The Ultimate Production Blueprint</h3>
+
+<p>In the modern industry standard, you combine both:</p>
+
+<ol>
+  <li>Package your Node.js app inside a lightweight <strong>Docker Container</strong></li>
+  <li>Configure it to run a single-threaded instance occupying exactly <strong>1 virtual CPU core</strong></li>
+  <li>Use <strong>AWS ECS or Kubernetes</strong> to spin up dozens of identical containers</li>
+  <li>Put an <strong>AWS Application Load Balancer</strong> in front of the entire fleet</li>
+</ol>
+
+<p>By matching one single-threaded Node.js instance to exactly one virtual CPU core, you eliminate thread resource contention and let cloud infrastructure handle global scaling seamlessly.</p>
+
+<hr />
+
+<p><em>Co-written with AI. Originally published on <a href="#">My Dev Blog</a>.</em></p>
+
+  </div>
+</article>
+
+    </main>
+    
+    <!-- Footer -->
+    <footer class="notion-footer">
+      <div class="footer-divider"></div>
+      <div class="footer-content">
+        <p class="footer-left">© 2026 Samrat Dutta Roy. Built in Notion style.</p>
+        <div class="footer-right">
+          <a href="https://github.com/dutta-roy-samrat" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="https://linkedin.com/in/samrat-dutta-roy-032a86194" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Persistent Light/Dark Mode Logic -->
+  <script>
+    (function() {
+      const toggle = document.getElementById('theme-toggle');
+      const moonIcon = document.querySelector('.moon-icon');
+      const sunIcon = document.querySelector('.sun-icon');
+      
+      function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        
+        if (theme === 'dark') {
+          moonIcon.style.display = 'none';
+          sunIcon.style.display = 'block';
+        } else {
+          moonIcon.style.display = 'block';
+          sunIcon.style.display = 'none';
+        }
+      }
+      
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+      
+      setTheme(initialTheme);
+      
+      toggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        setTheme(nextTheme);
+      });
+    })();
+  </script>
+</body>
+</html>

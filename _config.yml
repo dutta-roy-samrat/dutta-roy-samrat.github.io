@@ -26,6 +26,10 @@ kramdown:
 minima:
   skin: classic
 
+header_pages:
+  - hide-nav-links.md
+
+
 # =============================================
 #   Plugins
 # =============================================
@@ -37,7 +41,7 @@ plugins:
 # =============================================
 #   Permalink Style
 # =============================================
-permalink: /posts/:year/:month/:day/:title/
+permalink: /posts/:title/
 
 # =============================================
 #   Post Defaults

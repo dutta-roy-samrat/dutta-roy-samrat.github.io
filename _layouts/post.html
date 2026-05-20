@@ -1,0 +1,89 @@
+---
+layout: default
+---
+<article class="notion-post">
+  <!-- Post Title -->
+  <h1 class="notion-post-title">{{ page.title }}</h1>
+  
+  <!-- Notion Page Properties Grid -->
+  <div class="notion-properties-grid">
+    <!-- Date Property -->
+    <div class="notion-property-row">
+      <div class="notion-property-label">
+        <svg viewBox="0 0 24 24" class="property-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        Date
+      </div>
+      <div class="notion-property-value">
+        <span class="property-date">{{ page.date | date: "%B %d, %Y" }}</span>
+      </div>
+    </div>
+    
+    <!-- Tags Property -->
+    {% if page.tags and page.tags.size > 0 %}
+    <div class="notion-property-row">
+      <div class="notion-property-label">
+        <svg viewBox="0 0 24 24" class="property-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+          <line x1="7" y1="7" x2="7.01" y2="7"></line>
+        </svg>
+        Tags
+      </div>
+      <div class="notion-property-value">
+        <div class="notion-tags-container">
+          {% for tag in page.tags %}
+            {% assign tag_clean = tag | downcase %}
+            {% assign color_class = "pastel-gray" %}
+            {% if tag_clean contains "node" %}{% assign color_class = "pastel-green" %}
+            {% elsif tag_clean contains "back" %}{% assign color_class = "pastel-blue" %}
+            {% elsif tag_clean contains "java" or tag_clean contains "js" %}{% assign color_class = "pastel-yellow" %}
+            {% elsif tag_clean contains "arch" %}{% assign color_class = "pastel-purple" %}
+            {% elsif tag_clean contains "front" %}{% assign color_class = "pastel-pink" %}
+            {% endif %}
+            <span class="notion-tag {{ color_class }}">{{ tag }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    
+    <!-- Author Property -->
+    <div class="notion-property-row">
+      <div class="notion-property-label">
+        <svg viewBox="0 0 24 24" class="property-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        Author
+      </div>
+      <div class="notion-property-value">
+        <span class="property-author">{{ page.author | default: site.author }}</span>
+      </div>
+    </div>
+    
+    <!-- Status Property -->
+    <div class="notion-property-row">
+      <div class="notion-property-label">
+        <svg viewBox="0 0 24 24" class="property-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        Status
+      </div>
+      <div class="notion-property-value">
+        <span class="notion-tag pastel-green font-medium">Published</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="notion-property-divider"></div>
+  
+  <!-- Post Content -->
+  <div class="notion-post-content">
+    {{ content }}
+  </div>
+</article>
