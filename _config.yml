@@ -1,14 +1,20 @@
 # =============================================
 #   Site Settings
 # =============================================
-title: "My Dev Blog"
-description: "Thoughts on code, tools, and tech."
-keywords: [dev blog, web performance, software engineering, frontend development, browser internals, javascript, system design]
+title: "Samrat Dutta Roy | Tech Blog"
+description: "Technical deep-dives on frontend architecture, browser engines, JavaScript internals, and web performance by a Senior Frontend Engineer."
+keywords: [samrat dutta roy, dev blog, web performance, software engineering, frontend development, browser internals, javascript, system design]
 author: "Samrat Dutta Roy"
 email: samratduttaroy008@gmail.com
 
 url: "https://dutta-roy-samrat.github.io"
 baseurl: ""
+
+# Social & SEO Previews
+image: "/assets/images/notion-cover.png"
+twitter:
+  card: summary_large_image
+
 
 # =============================================
 #   Build Settings

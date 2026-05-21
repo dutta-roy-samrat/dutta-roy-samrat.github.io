@@ -4,6 +4,8 @@ title: "The Great Node.js Myth: Is It Really Single-Threaded?"
 date: 2026-05-20
 author: Samrat Dutta Roy
 tags: [nodejs, backend, javascript, architecture]
+image: "/assets/images/notion-cover.png"
+keywords: [is nodejs single threaded, nodejs event loop, worker threads, nodejs performance, backend architecture, libuv thread pool]
 description: "Yes and no — and that's exactly why it trips up so many engineers in interviews. Here's a deep dive into what's really happening under the hood."
 ---
 

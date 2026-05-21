@@ -4,6 +4,8 @@ title: "What Does UTF-8 Actually Mean? A Real Bug That Finally Made It Click"
 date: 2026-05-21
 author: Samrat Dutta Roy
 tags: [javascript, encoding, utf-8, frontend, debugging]
+image: "/assets/images/notion-cover.png"
+keywords: [what is utf-8, unicode vs ascii, byte order mark, csv excel encoding bug, character sets explained, javascript string encoding]
 description: "You've typed charset=utf-8 a hundred times. But do you know what it actually does? A real emoji bug in a CSV export taught me everything."
 ---
 
