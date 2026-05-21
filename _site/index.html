@@ -3,7 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Dynamic SVG Favicon based on Page Emoji (Notion Style) -->
+  
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>"><!-- Begin Jekyll SEO tag v2.8.0 -->
 <title>Samrat Dutta Roy Senior Frontend Engineer | Samrat Dutta Roy Tech Blog</title>
 <meta name="generator" content="Jekyll v3.9.5" />
 <meta property="og:title" content="Samrat Dutta Roy Senior Frontend Engineer" />
@@ -27,18 +30,48 @@
 
     <meta name="keywords" content="samrat dutta roy, portfolio, frontend engineer, software engineer, tech blog, dev blog, react, performance optimization, javascript, system design">
   
-  <link rel="stylesheet" href="/assets/main.css?v=20260521101139"><link type="application/atom+xml" rel="alternate" href="https://dutta-roy-samrat.github.io/feed.xml" title="Samrat Dutta Roy | Tech Blog" /><link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="/assets/main.css?v=20260521180941"><link type="application/atom+xml" rel="alternate" href="https://dutta-roy-samrat.github.io/feed.xml" title="Samrat Dutta Roy | Tech Blog" /><link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script data-goatcounter="https://xcanor.goatcounter.com/count"
           async src="//gc.zgo.at/count.js"></script>
-  <!-- Anti-FOUC Theme Init -->
+  <!-- Anti-FOUC Theme Init & Scroll Restoration Stabilizer -->
   <script>
     (function() {
+      // 1. Anti-FOUC Theme Initialization
       const savedTheme = localStorage.getItem('theme');
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       const theme = (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : (prefersDark ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', theme);
+
+      // 2. Scroll Restoration Stabilizer (Prevents page jitter & early scroll clamping on refresh)
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+
+      // Save scroll position on scroll (throttled) and pagehide
+      let scrollTimeout;
+      window.addEventListener('scroll', () => {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+          sessionStorage.setItem('scroll_pos_' + location.pathname, window.scrollY);
+        }, 150);
+      });
+
+      window.addEventListener('pagehide', () => {
+        sessionStorage.setItem('scroll_pos_' + location.pathname, window.scrollY);
+      });
+
+      function restoreScroll() {
+        const scrollPos = sessionStorage.getItem('scroll_pos_' + location.pathname);
+        if (scrollPos) {
+          window.scrollTo(0, parseInt(scrollPos, 10));
+        }
+      }
+
+      // Restore position at DOMContentLoaded (before paint) and window load (failsafe)
+      document.addEventListener('DOMContentLoaded', restoreScroll);
+      window.addEventListener('load', restoreScroll);
     })();
   </script>
 </head>
@@ -97,6 +130,10 @@
   <!-- Main Content Container -->
   <div class="notion-container">
     <div class="notion-page-header-section">
+      
+        <div class="notion-page-icon">🚀</div>
+      
+    </div>
     <main class="notion-content-area" aria-label="Content">
       <!-- Page Header / Bio Section -->
 <div class="developer-hero">
@@ -248,9 +285,9 @@
       
       <tr>
         <td>
-          <a href="/posts/what-does-utf-8-actually-mean-a-real-bug-that-finally-made-it-click/" class="notion-table-title-link">
+          <a href="/posts/what-is-utf-8-character-encoding-a-real-bug-that-finally-made-it-click/" class="notion-table-title-link">
             <span class="notion-table-icon">📝</span>
-            What Does UTF-8 Actually Mean? A Real Bug That Finally Made It Click
+            What is UTF-8 Character Encoding? A Real Bug That Finally Made It Click
           </a>
         </td>
         <td>
@@ -262,17 +299,47 @@
               
               
               
+              <span class="notion-tag pastel-gray">utf-8</span>
+            
+              
+              
+              
+              <span class="notion-tag pastel-gray">character encoding</span>
+            
+              
+              
+              
+              <span class="notion-tag pastel-gray">unicode</span>
+            
+              
+              
+              
               <span class="notion-tag pastel-yellow">javascript</span>
             
               
               
               
-              <span class="notion-tag pastel-gray">encoding</span>
+              <span class="notion-tag pastel-gray">csv export</span>
             
               
               
               
-              <span class="notion-tag pastel-gray">utf-8</span>
+              <span class="notion-tag pastel-gray">byte order mark</span>
+            
+              
+              
+              
+              <span class="notion-tag pastel-gray">BOM</span>
+            
+              
+              
+              
+              <span class="notion-tag pastel-gray">charset</span>
+            
+              
+              
+              
+              <span class="notion-tag pastel-gray">emoji encoding</span>
             
               
               
@@ -293,9 +360,9 @@
       
       <tr>
         <td>
-          <a href="/posts/the-great-nodejs-myth/" class="notion-table-title-link">
+          <a href="/posts/is-nodejs-single-threaded-the-complete-answer-explained/" class="notion-table-title-link">
             <span class="notion-table-icon">📝</span>
-            The Great Node.js Myth: Is It Really Single-Threaded?
+            Is Node.js Single-Threaded? The Complete Answer Explained
           </a>
         </td>
         <td>
@@ -312,6 +379,31 @@
               
               
               
+              <span class="notion-tag pastel-gray">single-threaded</span>
+            
+              
+              
+              
+              <span class="notion-tag pastel-gray">event loop</span>
+            
+              
+              
+              
+              <span class="notion-tag pastel-gray">libuv</span>
+            
+              
+              
+              
+              <span class="notion-tag pastel-gray">worker threads</span>
+            
+              
+              
+              
+              <span class="notion-tag pastel-gray">cluster module</span>
+            
+              
+              
+              
               <span class="notion-tag pastel-blue">backend</span>
             
               
@@ -322,7 +414,12 @@
               
               
               
-              <span class="notion-tag pastel-purple">architecture</span>
+              <span class="notion-tag pastel-green">node.js architecture</span>
+            
+              
+              
+              
+              <span class="notion-tag pastel-gray">interview questions</span>
             
           </div>
         </td>

@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Dynamic SVG Favicon based on Page Emoji (Notion Style) -->
+  
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔤</text></svg>"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>What is UTF-8 Character Encoding? A Real Bug That Finally Made It Click | Samrat Dutta Roy Tech Blog</title>
+<meta name="generator" content="Jekyll v3.9.5" />
+<meta property="og:title" content="What is UTF-8 Character Encoding? A Real Bug That Finally Made It Click" />
+<meta name="author" content="Samrat Dutta Roy" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="What is UTF-8 encoding and why does it matter? A real emoji bug in a CSV export — and two lines of code that fixed it — explains character encoding, Unicode, the Byte Order Mark, and why charset=utf-8 alone isn’t always enough." />
+<meta property="og:description" content="What is UTF-8 encoding and why does it matter? A real emoji bug in a CSV export — and two lines of code that fixed it — explains character encoding, Unicode, the Byte Order Mark, and why charset=utf-8 alone isn’t always enough." />
+<link rel="canonical" href="https://dutta-roy-samrat.github.io/posts/what-is-utf-8-character-encoding-a-real-bug-that-finally-made-it-click/" />
+<meta property="og:url" content="https://dutta-roy-samrat.github.io/posts/what-is-utf-8-character-encoding-a-real-bug-that-finally-made-it-click/" />
+<meta property="og:site_name" content="Samrat Dutta Roy Tech Blog" />
+<meta property="og:image" content="https://dutta-roy-samrat.github.io/assets/images/utf8-encoding.webp" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-05-21T00:00:00+05:30" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:image" content="https://dutta-roy-samrat.github.io/assets/images/utf8-encoding.webp" />
+<meta property="twitter:title" content="What is UTF-8 Character Encoding? A Real Bug That Finally Made It Click" />
+<meta name="twitter:site" content="@" />
+<meta name="twitter:creator" content="@Samrat Dutta Roy" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Samrat Dutta Roy"},"dateModified":"2026-05-21T00:00:00+05:30","datePublished":"2026-05-21T00:00:00+05:30","description":"What is UTF-8 encoding and why does it matter? A real emoji bug in a CSV export — and two lines of code that fixed it — explains character encoding, Unicode, the Byte Order Mark, and why charset=utf-8 alone isn’t always enough.","headline":"What is UTF-8 Character Encoding? A Real Bug That Finally Made It Click","image":"https://dutta-roy-samrat.github.io/assets/images/utf8-encoding.webp","mainEntityOfPage":{"@type":"WebPage","@id":"https://dutta-roy-samrat.github.io/posts/what-is-utf-8-character-encoding-a-real-bug-that-finally-made-it-click/"},"url":"https://dutta-roy-samrat.github.io/posts/what-is-utf-8-character-encoding-a-real-bug-that-finally-made-it-click/"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <meta name="keywords" content="samrat dutta roy, dev blog, web performance, software engineering, frontend development, browser internals, javascript, system design">
+  
+  <link rel="stylesheet" href="/assets/main.css?v=20260521180941"><link type="application/atom+xml" rel="alternate" href="https://dutta-roy-samrat.github.io/feed.xml" title="Samrat Dutta Roy | Tech Blog" /><link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script data-goatcounter="https://xcanor.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+  <!-- Anti-FOUC Theme Init & Scroll Restoration Stabilizer -->
+  <script>
+    (function() {
+      // 1. Anti-FOUC Theme Initialization
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : (prefersDark ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+
+      // 2. Scroll Restoration Stabilizer (Prevents page jitter & early scroll clamping on refresh)
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+
+      // Save scroll position on scroll (throttled) and pagehide
+      let scrollTimeout;
+      window.addEventListener('scroll', () => {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+          sessionStorage.setItem('scroll_pos_' + location.pathname, window.scrollY);
+        }, 150);
+      });
+
+      window.addEventListener('pagehide', () => {
+        sessionStorage.setItem('scroll_pos_' + location.pathname, window.scrollY);
+      });
+
+      function restoreScroll() {
+        const scrollPos = sessionStorage.getItem('scroll_pos_' + location.pathname);
+        if (scrollPos) {
+          window.scrollTo(0, parseInt(scrollPos, 10));
+        }
+      }
+
+      // Restore position at DOMContentLoaded (before paint) and window load (failsafe)
+      document.addEventListener('DOMContentLoaded', restoreScroll);
+      window.addEventListener('load', restoreScroll);
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- Top Sticky Navigation / Breadcrumbs -->
+  <header class="notion-navbar">
+    <div class="notion-navbar-container">
+      <div class="notion-breadcrumbs">
+        <a href="/" class="crumb-link mobile-hide">
+          <span class="crumb">📂 Samrat Dutta Roy</span>
+        </a>
+        
+          <span class="divider mobile-hide">/</span>
+          <span class="crumb text-muted mobile-hide">📝 Posts</span>
+          <span class="divider mobile-hide">/</span>
+          <span class="crumb current-page">What is UTF-8 Character Encoding? A Real Bug That Finally Made It Click</span>
+        
+      </div>
+      
+      <div class="notion-nav-actions">
+        <a href="/" class="nav-link">Home</a>
+        <a href="https://github.com/dutta-roy-samrat" target="_blank" rel="noopener noreferrer" class="nav-link">GitHub</a>
+        <a href="https://linkedin.com/in/samrat-dutta-roy-032a86194" target="_blank" rel="noopener noreferrer" class="nav-link">LinkedIn</a>
+        <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme">
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notion Cover Banner -->
+  <div class="notion-cover-wrapper" id="notion-cover-wrapper">
+    
+      <img src="/assets/images/notion-cover.png" class="notion-cover-img" alt="Cover banner" loading="lazy">
+    
+    <canvas id="mario-canvas" class="mario-canvas"></canvas>
+    <div id="mario-play-hint" class="mario-play-hint">🎮 Click / Space to Play Game</div>
+    <div class="mario-controls">
+      <button id="mario-btn-start" class="mario-btn">🎮 Play Game</button>
+      <button id="mario-btn-stop" class="mario-btn">⏹️ Stop Game</button>
+    </div>
+  </div>
+
+  <!-- Main Content Container -->
+  <div class="notion-container">
+    <div class="notion-page-header-section">
+      
+        <div class="notion-page-icon">🔤</div>
+      
+    </div>
+    <main class="notion-content-area" aria-label="Content">
+      <article class="notion-post">
+  <!-- Post Title -->
+  <h1 class="notion-post-title">What is UTF-8 Character Encoding? A Real Bug That Finally Made It Click</h1>
+  
+  <!-- Notion Page Properties Grid -->
+  <div class="notion-properties-grid">
+    <!-- Date Property -->
+    <div class="notion-property-row">
+      <div class="notion-property-label">
+        <svg viewBox="0 0 24 24" class="property-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        Date
+      </div>
+      <div class="notion-property-value">
+        <span class="property-date">May 21, 2026</span>
+      </div>
+    </div>
+    
+    <!-- Tags Property -->
+    
+    <div class="notion-property-row">
+      <div class="notion-property-label">
+        <svg viewBox="0 0 24 24" class="property-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+          <line x1="7" y1="7" x2="7.01" y2="7"></line>
+        </svg>
+        Tags
+      </div>
+      <div class="notion-property-value">
+        <div class="notion-tags-container">
+          
+            
+            
+            
+            <span class="notion-tag pastel-gray">utf-8</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-gray">character encoding</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-gray">unicode</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-yellow">javascript</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-gray">csv export</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-gray">byte order mark</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-gray">BOM</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-gray">charset</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-gray">emoji encoding</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-pink">frontend</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-gray">debugging</span>
+          
+        </div>
+      </div>
+    </div>
+    
+    
+    <!-- Author Property -->
+    <div class="notion-property-row">
+      <div class="notion-property-label">
+        <svg viewBox="0 0 24 24" class="property-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        Author
+      </div>
+      <div class="notion-property-value">
+        <span class="property-author">Samrat Dutta Roy</span>
+      </div>
+    </div>
+    
+    <!-- Status Property -->
+    <div class="notion-property-row">
+      <div class="notion-property-label">
+        <svg viewBox="0 0 24 24" class="property-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        Status
+      </div>
+      <div class="notion-property-value">
+        <span class="notion-tag pastel-green font-medium">Published</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="notion-property-divider"></div>
+  
+  <!-- Post Content -->
+  <div class="notion-post-content">
+    <blockquote>
+  <p><strong>Direct answer:</strong> UTF-8 is a variable-width character encoding that converts Unicode code points into bytes. It uses 1 byte for ASCII characters, up to 4 bytes for emojis and rare symbols. It is the dominant encoding on the web because it is space-efficient, backward-compatible with ASCII, and can represent every character in existence.</p>
+</blockquote>
+
+<p>You’ve typed this line dozens of times without thinking about it:</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">"UTF-8"</span><span class="nt">&gt;</span>
+</code></pre></div></div>
+
+<p>It sits at the top of every HTML file. Every tutorial tells you to put it there. Nobody really explains what <strong>UTF-8 character encoding</strong> actually means — or why it matters beyond copy-pasting it blindly.</p>
+
+<p>I didn’t truly understand it until a bug involving emojis and a CSV download forced me to.</p>
+
+<hr />
+
+<h2 id="the-bug-that-started-this">The Bug That Started This</h2>
+
+<p>I was adding an emoji picker to an existing message input feature. Nothing fancy — users type messages, optionally add an emoji, and the messages get stored. There was also an existing feature that let users download all messages as a CSV file, which they’d open in Excel.</p>
+
+<p>The feature worked. Or so I thought.</p>
+
+<p>When I tested it end-to-end, I noticed something strange in the downloaded CSV: <strong>some emojis displayed correctly in Excel, and some showed up as garbled nonsense</strong> — strange boxes, question marks, or completely wrong characters.</p>
+
+<p>Same code. Same download function. Some emojis fine, some broken.</p>
+
+<p>I had no idea where to start.</p>
+
+<hr />
+
+<h2 id="the-fix--and-the-questions-it-raised">The Fix — and the Questions It Raised</h2>
+
+<p>The fix eventually came down to two small additions to the CSV download logic:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">BOM</span> <span class="o">=</span> <span class="nx">encodeDownloadFileInUTF8</span> <span class="p">?</span> <span class="p">[</span><span class="dl">"</span><span class="se">\</span><span class="s2">uFEFF</span><span class="dl">"</span><span class="p">]</span> <span class="p">:</span> <span class="p">[];</span>
+
+<span class="kd">const</span> <span class="nx">csvBlob</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Blob</span><span class="p">([...</span><span class="nx">BOM</span><span class="p">,</span> <span class="nx">data</span> <span class="o">||</span> <span class="nx">blob</span><span class="p">],</span> <span class="p">{</span>
+  <span class="na">type</span><span class="p">:</span> <span class="s2">`text/csv;</span><span class="p">${</span><span class="nx">encodeDownloadFileInUTF8</span> <span class="p">?</span> <span class="dl">"</span><span class="s2">charset=utf-8;</span><span class="dl">"</span> <span class="p">:</span> <span class="dl">""</span><span class="p">}</span><span class="s2">`</span><span class="p">,</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p>Two things were added:</p>
+<ol>
+  <li>A mysterious <code class="language-plaintext highlighter-rouge">"\uFEFF"</code> prepended to the file — called a <strong>BOM</strong></li>
+  <li><code class="language-plaintext highlighter-rouge">charset=utf-8</code> added to the MIME type</li>
+</ol>
+
+<p>Both were added. The emojis rendered correctly in Excel.</p>
+
+<p>But I refused to just move on without understanding <em>why</em>. What is a BOM? What does <code class="language-plaintext highlighter-rouge">charset=utf-8</code> actually tell the browser? And why were only <em>some</em> emojis broken in the first place?</p>
+
+<p>Answering those questions meant going all the way back to basics — to how computers represent text at all.</p>
+
+<hr />
+
+<h2 id="how-does-a-computer-store-a-letter">How Does a Computer Store a Letter?</h2>
+
+<p>Here’s something that seems obvious once you hear it, but nobody spells out clearly:</p>
+
+<p><strong>Computers only understand numbers.</strong> Everything in memory — images, videos, code, text — is ultimately stored as binary digits: ones and zeros.</p>
+
+<p>A number like <code class="language-plaintext highlighter-rouge">65</code> is easy. In binary it’s <code class="language-plaintext highlighter-rouge">01000001</code>. Done.</p>
+
+<p>But what about the letter <code class="language-plaintext highlighter-rouge">"A"</code>? You can’t directly convert a character to binary the way you can a number. A character isn’t a number — it’s a symbol.</p>
+
+<p>So how does it work?</p>
+
+<p>The answer is: <strong>we agreed on a map.</strong></p>
+
+<hr />
+
+<h2 id="what-is-a-character-set-ascii-and-unicode-explained">What Is a Character Set? ASCII and Unicode Explained</h2>
+
+<p>A <strong>character set</strong> (or charset) is essentially a lookup table. It maps every character — letters, digits, punctuation, symbols — to a unique number. Once a character has a number, that number can be converted to binary, and the machine can store it.</p>
+
+<p>The two most important character sets:</p>
+
+<p><strong>ASCII</strong> was one of the earliest and simplest. It maps 128 characters to numbers 0–127. The letter <code class="language-plaintext highlighter-rouge">"A"</code> is 65. <code class="language-plaintext highlighter-rouge">"B"</code> is 66. A space is 32. It covers the basic English alphabet, digits, and common punctuation — nothing more.</p>
+
+<p><strong>Unicode</strong> is the modern, universal standard. Instead of 128 characters, it maps over 140,000 of them — every letter from every human language, mathematical symbols, and yes, emojis. The 😊 emoji, for example, is Unicode code point <code class="language-plaintext highlighter-rouge">U+1F60A</code>. In JavaScript, you can verify this:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">"</span><span class="s2">A</span><span class="dl">"</span><span class="p">.</span><span class="nx">charCodeAt</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>   <span class="c1">// 65  — the number Unicode (and ASCII) maps "A" to</span>
+<span class="dl">"</span><span class="s2">😊</span><span class="dl">"</span><span class="p">.</span><span class="nx">codePointAt</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span> <span class="c1">// 128522 — the number Unicode maps this emoji to</span>
+</code></pre></div></div>
+
+<p>So the character set answers: <em>“What number does this character correspond to?”</em></p>
+
+<p>But there’s a second question: <em>“How do we actually store that number in bytes?”</em></p>
+
+<p>That’s where <strong>encoding</strong> comes in.</p>
+
+<hr />
+
+<h2 id="what-is-utf-8-and-how-does-it-work">What Is UTF-8 and How Does It Work?</h2>
+
+<p><strong>UTF-8</strong> is not a character set. It’s an <strong>encoding</strong> — a set of rules for turning Unicode code point numbers into actual bytes that get written to memory or a file.</p>
+
+<p>Here’s the key insight that makes UTF-8 clever:</p>
+
+<ul>
+  <li>Simple characters (basic English letters, digits) that have small code point numbers get stored in <strong>1 byte</strong></li>
+  <li>Characters from other languages and accented letters use <strong>2 or 3 bytes</strong></li>
+  <li>Emojis and rare symbols use <strong>4 bytes</strong></li>
+</ul>
+
+<p>This is what “variable-width encoding” means. UTF-8 uses as few bytes as necessary for each character.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>"A"  → code point 65     → UTF-8: 1 byte  → 01000001
+"é"  → code point 233    → UTF-8: 2 bytes → 11000011 10101001
+"中" → code point 20013  → UTF-8: 3 bytes → 11100100 10111000 10001101
+"😊" → code point 128522 → UTF-8: 4 bytes → 11110000 10011111 10011000 10001010
+</code></pre></div></div>
+
+<p>This is why UTF-8 became the dominant encoding for the web. It’s backward-compatible with ASCII (the first 128 characters encode identically), space-efficient for English text, and capable of representing every character in existence.</p>
+
+<p>When you write <code class="language-plaintext highlighter-rouge">&lt;meta charset="UTF-8"&gt;</code> at the top of your HTML, you’re telling the browser: <em>“When you read this file’s bytes, decode them using UTF-8 rules.”</em></p>
+
+<p>Without that declaration, the browser guesses. And when it guesses wrong, characters break.</p>
+
+<hr />
+
+<h2 id="why-were-only-some-emojis-breaking-in-the-csv">Why Were Only Some Emojis Breaking in the CSV?</h2>
+
+<p>Now that the foundation is set, we can diagnose exactly what was happening.</p>
+
+<p>The CSV was being generated and downloaded without explicitly declaring its encoding. Excel, when it opens a CSV, also has to guess the encoding. And Excel’s default assumption — especially on Windows — is not UTF-8. It often defaults to a legacy encoding like <strong>Windows-1252</strong>, which only handles 256 characters.</p>
+
+<p>Here’s why only <em>some</em> emojis broke:</p>
+
+<ul>
+  <li>Simple emojis that happened to fall within the range Excel’s legacy encoding could interpret showed up fine — by accident</li>
+  <li>Emojis with 4-byte UTF-8 sequences that fell completely outside the legacy encoding’s range came out as garbage</li>
+</ul>
+
+<p>It wasn’t a random bug. It was entirely predictable once you understand encoding.</p>
+
+<hr />
+
+<h2 id="the-fix-explained">The Fix, Explained</h2>
+
+<p>Two things were added to the code. They look similar in purpose but operate at completely different layers — and only one of them actually fixed the bug.</p>
+
+<h3 id="what-is-a-bom-byte-order-mark-and-why-does-it-fix-excel">What Is a BOM (Byte Order Mark) and Why Does It Fix Excel?</h3>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">BOM</span> <span class="o">=</span> <span class="nx">encodeDownloadFileInUTF8</span> <span class="p">?</span> <span class="p">[</span><span class="dl">"</span><span class="se">\</span><span class="s2">uFEFF</span><span class="dl">"</span><span class="p">]</span> <span class="p">:</span> <span class="p">[];</span>
+<span class="kd">const</span> <span class="nx">csvBlob</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Blob</span><span class="p">([...</span><span class="nx">BOM</span><span class="p">,</span> <span class="nx">data</span> <span class="o">||</span> <span class="nx">blob</span><span class="p">],</span> <span class="p">{</span> <span class="p">...</span> <span class="p">});</span>
+</code></pre></div></div>
+
+<p><strong>BOM</strong> stands for <strong>Byte Order Mark</strong>. It’s a special invisible character (<code class="language-plaintext highlighter-rouge">U+FEFF</code>) prepended to the very start of a file.</p>
+
+<p>To understand what the BOM actually is, you need a tiny bit of backstory.</p>
+
+<p>When a number takes up multiple bytes in memory, there are two valid ways to arrange those bytes — most significant byte first (big-endian) or least significant byte first (little-endian). Both are legitimate. But if the reader doesn’t know which order was used, they’ll misread the number entirely.</p>
+
+<p>UTF-16 and UTF-32 store characters in multi-byte chunks, so byte order matters for them. The character <code class="language-plaintext highlighter-rouge">U+FEFF</code> was placed at the very start of files so that readers could detect which byte order was used — if they read it as <code class="language-plaintext highlighter-rouge">FE FF</code> it’s big-endian, if they read it as <code class="language-plaintext highlighter-rouge">FF FE</code> it’s little-endian. That’s where the name <strong>Byte Order Mark</strong> comes from.</p>
+
+<p><strong>UTF-8 doesn’t actually need this.</strong> It processes one byte at a time and builds up characters using its own rules, so byte order is never ambiguous. The BOM has no technical purpose in UTF-8.</p>
+
+<p>But it got repurposed as a convention. When <code class="language-plaintext highlighter-rouge">\uFEFF</code> is encoded in UTF-8, it produces a specific three-byte sequence at the start of the file: <code class="language-plaintext highlighter-rouge">EF BB BF</code>. Excel on Windows recognises these exact bytes as a signal meaning <em>“this file is UTF-8.”</em> It has nothing to do with byte order anymore — Excel just looks for those three bytes, and if it finds them, it stops guessing and decodes the whole file as UTF-8.</p>
+
+<p><strong>The BOM is what actually fixed the bug.</strong> It survives the journey from browser to disk to Excel because it lives inside the file itself — not in any header or metadata that gets stripped away.</p>
+
+<h3 id="does-charsetutf-8-in-the-mime-type-fix-the-problem">Does <code class="language-plaintext highlighter-rouge">charset=utf-8</code> in the MIME Type Fix the Problem?</h3>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">type</span><span class="p">:</span> <span class="s2">`text/csv;charset=utf-8;`</span>
+</code></pre></div></div>
+
+<p>This tells the browser — and any application that reads MIME types — that the content is encoded in UTF-8.</p>
+
+<p>But here’s the honest reality: <strong>for the specific bug we were fixing, this alone would not have helped.</strong></p>
+
+<p>When a user downloads a CSV and opens it by double-clicking, Excel on Windows doesn’t see the MIME type. That information exists at the HTTP/browser layer and gets lost the moment the file is saved to disk. Excel never gets a chance to read it.</p>
+
+<p>So why add it at all? Because not everything that reads your file is Excel:</p>
+
+<ul>
+  <li>A Python script processing the CSV programmatically will read the MIME type and decode correctly</li>
+  <li>An API consuming the file will respect it</li>
+  <li>A browser rendering the CSV directly will use it</li>
+  <li>It documents intent — any tool that <em>does</em> respect MIME types will handle the file correctly</li>
+</ul>
+
+<p>Think of it this way:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th><code class="language-plaintext highlighter-rouge">charset=utf-8</code> in MIME</th>
+      <th>BOM <code class="language-plaintext highlighter-rouge">\uFEFF</code></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Lives in</strong></td>
+      <td>HTTP / MIME headers</td>
+      <td>The file’s actual bytes</td>
+    </tr>
+    <tr>
+      <td><strong>Survives saving to disk</strong></td>
+      <td>❌ No</td>
+      <td>✅ Yes</td>
+    </tr>
+    <tr>
+      <td><strong>Excel on Windows reads it</strong></td>
+      <td>❌ Not reliably</td>
+      <td>✅ Yes</td>
+    </tr>
+    <tr>
+      <td><strong>Programmatic tools read it</strong></td>
+      <td>✅ Yes</td>
+      <td>Mostly ignored</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The MIME type tells tools that <em>ask</em> what encoding this is. The BOM tells tools — like Excel — that <em>don’t bother asking.</em></p>
+
+<p>For this bug, if you had to pick just one: the BOM was the fix. The <code class="language-plaintext highlighter-rouge">charset=utf-8</code> was the right thing to add alongside it — but it was good practice, not the cure.</p>
+
+<hr />
+
+<h2 id="the-mental-model-simplified">The Mental Model, Simplified</h2>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Character  →  [Character Set]  →  Code Point Number  →  [Encoding]  →  Bytes in memory/file
+
+   "A"     →    Unicode        →        65            →    UTF-8     →   01000001
+   "😊"    →    Unicode        →      128522          →    UTF-8     →   4 bytes
+</code></pre></div></div>
+
+<ul>
+  <li><strong>Character Set (Unicode):</strong> gives every symbol a unique number</li>
+  <li><strong>Encoding (UTF-8):</strong> defines how to turn that number into actual bytes</li>
+  <li><strong>BOM (<code class="language-plaintext highlighter-rouge">\uFEFF</code>):</strong> a signal baked into the file’s bytes — survives to disk, read by Excel</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">charset=utf-8</code>:</strong> a signal in the MIME/HTTP layer — read by browsers and programmatic tools, but lost when the file is saved locally</li>
+</ul>
+
+<hr />
+
+<h2 id="what-to-take-away">What to Take Away</h2>
+
+<p>The next time you see <code class="language-plaintext highlighter-rouge">&lt;meta charset="UTF-8"&gt;</code> or <code class="language-plaintext highlighter-rouge">charset=utf-8</code> in a content type header, you’ll know exactly what it’s doing. It’s not boilerplate. It’s a contract — you’re telling every tool in the chain: <em>“Here’s the encoding I used to write these bytes. Please use the same rules to read them.”</em></p>
+
+<p>When that contract is missing or mismatched, text breaks. Sometimes obviously, sometimes only for edge cases like 4-byte emoji sequences that a legacy encoding never anticipated.</p>
+
+<p>A small invisible character at the start of a file fixed my bug. Now I’ll never forget what it means.</p>
+
+<hr />
+
+<h2 id="frequently-asked-questions">Frequently Asked Questions</h2>
+
+<p><strong>What is UTF-8 encoding?</strong>
+UTF-8 is a variable-width character encoding system that converts Unicode code points into bytes. It uses 1 byte for basic ASCII characters and up to 4 bytes for emojis and rare symbols. It is the most widely used encoding on the web.</p>
+
+<p><strong>What is the difference between a character set and an encoding?</strong>
+A character set (like Unicode or ASCII) maps characters to unique numbers called code points. An encoding (like UTF-8) defines the rules for converting those code point numbers into actual bytes stored in memory or files. UTF-8 is an encoding of the Unicode character set.</p>
+
+<p><strong>Why does <code class="language-plaintext highlighter-rouge">&lt;meta charset="UTF-8"&gt;</code> need to be in every HTML file?</strong>
+Without it, the browser has to guess how to interpret the file’s bytes. If the guess is wrong, characters render as garbage — especially accented letters, non-Latin scripts, and emojis. Declaring <code class="language-plaintext highlighter-rouge">charset=utf-8</code> tells the browser exactly which rules to use.</p>
+
+<p><strong>What is a Byte Order Mark (BOM) and when do you need it?</strong>
+A BOM (<code class="language-plaintext highlighter-rouge">\uFEFF</code>) is a special invisible character prepended to a file’s bytes. In UTF-8 files, it encodes as <code class="language-plaintext highlighter-rouge">EF BB BF</code> and signals to applications like Excel on Windows that the file is UTF-8 encoded. It is particularly important when generating CSVs that users will open in Excel, since Excel does not reliably read the MIME type charset declaration after a file is saved to disk.</p>
+
+<p><strong>Why do only some emojis break in Excel CSVs?</strong>
+Excel on Windows defaults to a legacy encoding (like Windows-1252) when opening CSVs without explicit encoding signals. Emojis that happen to fall within that legacy encoding’s range display by accident. Emojis requiring 4-byte UTF-8 sequences — outside the legacy encoding’s range entirely — come out as garbled characters.</p>
+
+<hr />
+
+<p><em>Co-written with AI.</em></p>
+
+  </div>
+</article>
+
+    </main>
+    
+    <!-- Footer -->
+    <footer class="notion-footer">
+      <div class="footer-divider"></div>
+      <div class="footer-content">
+        <p class="footer-left">© 2026 Samrat Dutta Roy. Built in Notion style.</p>
+        <div class="footer-right">
+          <a href="https://github.com/dutta-roy-samrat" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="https://linkedin.com/in/samrat-dutta-roy-032a86194" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Deferred External Scripts for Caching & Performance -->
+  <script src="/assets/js/theme.js" defer></script>
+  <script src="/assets/js/mario.js" defer></script>
+</body>
+</html>

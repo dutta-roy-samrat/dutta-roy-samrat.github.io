@@ -4,6 +4,13 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Dynamic SVG Favicon based on Page Emoji (Notion Style) -->
+  {% if page.emoji %}
+    {% assign favicon_emoji = page.emoji %}
+  {% else %}
+    {% assign favicon_emoji = "🚀" %}
+  {% endif %}
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>{{ favicon_emoji }}</text></svg>">
   {%- seo -%}
   {% if page.keywords %}
     <meta name="keywords" content="{{ page.keywords | join: ', ' }}">
@@ -17,13 +24,43 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script data-goatcounter="https://xcanor.goatcounter.com/count"
           async src="//gc.zgo.at/count.js"></script>
-  <!-- Anti-FOUC Theme Init -->
+  <!-- Anti-FOUC Theme Init & Scroll Restoration Stabilizer -->
   <script>
     (function() {
+      // 1. Anti-FOUC Theme Initialization
       const savedTheme = localStorage.getItem('theme');
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       const theme = (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : (prefersDark ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', theme);
+
+      // 2. Scroll Restoration Stabilizer (Prevents page jitter & early scroll clamping on refresh)
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+
+      // Save scroll position on scroll (throttled) and pagehide
+      let scrollTimeout;
+      window.addEventListener('scroll', () => {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+          sessionStorage.setItem('scroll_pos_' + location.pathname, window.scrollY);
+        }, 150);
+      });
+
+      window.addEventListener('pagehide', () => {
+        sessionStorage.setItem('scroll_pos_' + location.pathname, window.scrollY);
+      });
+
+      function restoreScroll() {
+        const scrollPos = sessionStorage.getItem('scroll_pos_' + location.pathname);
+        if (scrollPos) {
+          window.scrollTo(0, parseInt(scrollPos, 10));
+        }
+      }
+
+      // Restore position at DOMContentLoaded (before paint) and window load (failsafe)
+      document.addEventListener('DOMContentLoaded', restoreScroll);
+      window.addEventListener('load', restoreScroll);
     })();
   </script>
 </head>
@@ -89,6 +126,12 @@
   <!-- Main Content Container -->
   <div class="notion-container">
     <div class="notion-page-header-section">
+      {% if page.emoji %}
+        <div class="notion-page-icon">{{ page.emoji }}</div>
+      {% else %}
+        <div class="notion-page-icon">🚀</div>
+      {% endif %}
+    </div>
     <main class="notion-content-area" aria-label="Content">
       {{ content }}
     </main>

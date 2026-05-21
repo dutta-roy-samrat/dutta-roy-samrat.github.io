@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
-<loc>https://dutta-roy-samrat.github.io/posts/the-great-nodejs-myth/</loc>
+<loc>https://dutta-roy-samrat.github.io/posts/is-nodejs-single-threaded-the-complete-answer-explained/</loc>
 <lastmod>2026-05-20T00:00:00+05:30</lastmod>
 </url>
 <url>
-<loc>https://dutta-roy-samrat.github.io/posts/what-does-utf-8-actually-mean-a-real-bug-that-finally-made-it-click/</loc>
+<loc>https://dutta-roy-samrat.github.io/posts/what-is-utf-8-character-encoding-a-real-bug-that-finally-made-it-click/</loc>
 <lastmod>2026-05-21T00:00:00+05:30</lastmod>
 </url>
 <url>

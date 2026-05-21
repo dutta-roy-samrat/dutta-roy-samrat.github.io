@@ -1,15 +1,19 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.5">Jekyll</generator><link href="https://dutta-roy-samrat.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://dutta-roy-samrat.github.io/" rel="alternate" type="text/html" /><updated>2026-05-21T10:11:39+05:30</updated><id>https://dutta-roy-samrat.github.io/feed.xml</id><title type="html">Samrat Dutta Roy | Tech Blog</title><subtitle>Technical deep-dives on frontend architecture, browser engines, JavaScript internals, and web performance by a Senior Frontend Engineer.</subtitle><author><name>Samrat Dutta Roy</name></author><entry><title type="html">What Does UTF-8 Actually Mean? A Real Bug That Finally Made It Click</title><link href="https://dutta-roy-samrat.github.io/posts/what-does-utf-8-actually-mean-a-real-bug-that-finally-made-it-click/" rel="alternate" type="text/html" title="What Does UTF-8 Actually Mean? A Real Bug That Finally Made It Click" /><published>2026-05-21T00:00:00+05:30</published><updated>2026-05-21T00:00:00+05:30</updated><id>https://dutta-roy-samrat.github.io/posts/what-does-utf-8-actually-mean-a-real-bug-that-finally-made-it-click</id><content type="html" xml:base="https://dutta-roy-samrat.github.io/posts/what-does-utf-8-actually-mean-a-real-bug-that-finally-made-it-click/"><![CDATA[<p>You’ve typed this line dozens of times without thinking about it:</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.5">Jekyll</generator><link href="https://dutta-roy-samrat.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://dutta-roy-samrat.github.io/" rel="alternate" type="text/html" /><updated>2026-05-21T18:09:41+05:30</updated><id>https://dutta-roy-samrat.github.io/feed.xml</id><title type="html">Samrat Dutta Roy | Tech Blog</title><subtitle>Technical deep-dives on frontend architecture, browser engines, JavaScript internals, and web performance by a Senior Frontend Engineer.</subtitle><author><name>Samrat Dutta Roy</name></author><entry><title type="html">What is UTF-8 Character Encoding? A Real Bug That Finally Made It Click</title><link href="https://dutta-roy-samrat.github.io/posts/what-is-utf-8-character-encoding-a-real-bug-that-finally-made-it-click/" rel="alternate" type="text/html" title="What is UTF-8 Character Encoding? A Real Bug That Finally Made It Click" /><published>2026-05-21T00:00:00+05:30</published><updated>2026-05-21T00:00:00+05:30</updated><id>https://dutta-roy-samrat.github.io/posts/what-is-utf-8-character-encoding-a-real-bug-that-finally-made-it-click</id><content type="html" xml:base="https://dutta-roy-samrat.github.io/posts/what-is-utf-8-character-encoding-a-real-bug-that-finally-made-it-click/"><![CDATA[<blockquote>
+  <p><strong>Direct answer:</strong> UTF-8 is a variable-width character encoding that converts Unicode code points into bytes. It uses 1 byte for ASCII characters, up to 4 bytes for emojis and rare symbols. It is the dominant encoding on the web because it is space-efficient, backward-compatible with ASCII, and can represent every character in existence.</p>
+</blockquote>
+
+<p>You’ve typed this line dozens of times without thinking about it:</p>
 
 <div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">"UTF-8"</span><span class="nt">&gt;</span>
 </code></pre></div></div>
 
-<p>It sits at the top of every HTML file. Every tutorial tells you to put it there. Nobody really explains what it means — or why it matters.</p>
+<p>It sits at the top of every HTML file. Every tutorial tells you to put it there. Nobody really explains what <strong>UTF-8 character encoding</strong> actually means — or why it matters beyond copy-pasting it blindly.</p>
 
 <p>I didn’t truly understand it until a bug involving emojis and a CSV download forced me to.</p>
 
 <hr />
 
-<h2 id="the-bug">The Bug</h2>
+<h2 id="the-bug-that-started-this">The Bug That Started This</h2>
 
 <p>I was adding an emoji picker to an existing message input feature. Nothing fancy — users type messages, optionally add an emoji, and the messages get stored. There was also an existing feature that let users download all messages as a CSV file, which they’d open in Excel.</p>
 
@@ -23,7 +27,7 @@
 
 <hr />
 
-<h2 id="going-down-the-rabbit-hole">Going Down the Rabbit Hole</h2>
+<h2 id="the-fix--and-the-questions-it-raised">The Fix — and the Questions It Raised</h2>
 
 <p>The fix eventually came down to two small additions to the CSV download logic:</p>
 
@@ -40,7 +44,7 @@
   <li><code class="language-plaintext highlighter-rouge">charset=utf-8</code> added to the MIME type</li>
 </ol>
 
-<p>Both fixes worked. The emojis rendered correctly in Excel.</p>
+<p>Both were added. The emojis rendered correctly in Excel.</p>
 
 <p>But I refused to just move on without understanding <em>why</em>. What is a BOM? What does <code class="language-plaintext highlighter-rouge">charset=utf-8</code> actually tell the browser? And why were only <em>some</em> emojis broken in the first place?</p>
 
@@ -48,7 +52,7 @@
 
 <hr />
 
-<h2 id="how-does-a-computer-even-store-a-letter">How Does a Computer Even Store a Letter?</h2>
+<h2 id="how-does-a-computer-store-a-letter">How Does a Computer Store a Letter?</h2>
 
 <p>Here’s something that seems obvious once you hear it, but nobody spells out clearly:</p>
 
@@ -64,11 +68,11 @@
 
 <hr />
 
-<h2 id="character-sets-the-map-from-symbol-to-number">Character Sets: The Map From Symbol to Number</h2>
+<h2 id="what-is-a-character-set-ascii-and-unicode-explained">What Is a Character Set? ASCII and Unicode Explained</h2>
 
 <p>A <strong>character set</strong> (or charset) is essentially a lookup table. It maps every character — letters, digits, punctuation, symbols — to a unique number. Once a character has a number, that number can be converted to binary, and the machine can store it.</p>
 
-<p>The two most important character sets you’ll encounter:</p>
+<p>The two most important character sets:</p>
 
 <p><strong>ASCII</strong> was one of the earliest and simplest. It maps 128 characters to numbers 0–127. The letter <code class="language-plaintext highlighter-rouge">"A"</code> is 65. <code class="language-plaintext highlighter-rouge">"B"</code> is 66. A space is 32. It covers the basic English alphabet, digits, and common punctuation — nothing more.</p>
 
@@ -86,7 +90,7 @@
 
 <hr />
 
-<h2 id="utf-8-the-encoding-that-translates-numbers-into-bytes">UTF-8: The Encoding That Translates Numbers Into Bytes</h2>
+<h2 id="what-is-utf-8-and-how-does-it-work">What Is UTF-8 and How Does It Work?</h2>
 
 <p><strong>UTF-8</strong> is not a character set. It’s an <strong>encoding</strong> — a set of rules for turning Unicode code point numbers into actual bytes that get written to memory or a file.</p>
 
@@ -94,7 +98,7 @@
 
 <ul>
   <li>Simple characters (basic English letters, digits) that have small code point numbers get stored in <strong>1 byte</strong></li>
-  <li>Characters from other languages, accented letters, and common symbols use <strong>2 or 3 bytes</strong></li>
+  <li>Characters from other languages and accented letters use <strong>2 or 3 bytes</strong></li>
   <li>Emojis and rare symbols use <strong>4 bytes</strong></li>
 </ul>
 
@@ -106,7 +110,7 @@
 "😊" → code point 128522 → UTF-8: 4 bytes → 11110000 10011111 10011000 10001010
 </code></pre></div></div>
 
-<p>This is why UTF-8 became the dominant encoding for the web. It’s backward-compatible with ASCII (the first 128 characters encode identically), it’s space-efficient for English text, and it can represent every character in existence.</p>
+<p>This is why UTF-8 became the dominant encoding for the web. It’s backward-compatible with ASCII (the first 128 characters encode identically), space-efficient for English text, and capable of representing every character in existence.</p>
 
 <p>When you write <code class="language-plaintext highlighter-rouge">&lt;meta charset="UTF-8"&gt;</code> at the top of your HTML, you’re telling the browser: <em>“When you read this file’s bytes, decode them using UTF-8 rules.”</em></p>
 
@@ -114,7 +118,7 @@
 
 <hr />
 
-<h2 id="back-to-the-bug-why-were-only-some-emojis-breaking">Back to the Bug: Why Were Only Some Emojis Breaking?</h2>
+<h2 id="why-were-only-some-emojis-breaking-in-the-csv">Why Were Only Some Emojis Breaking in the CSV?</h2>
 
 <p>Now that the foundation is set, we can diagnose exactly what was happening.</p>
 
@@ -135,7 +139,7 @@
 
 <p>Two things were added to the code. They look similar in purpose but operate at completely different layers — and only one of them actually fixed the bug.</p>
 
-<h3 id="the-real-fix-the-bom--ufeff">The Real Fix: The BOM — <code class="language-plaintext highlighter-rouge">"\uFEFF"</code></h3>
+<h3 id="what-is-a-bom-byte-order-mark-and-why-does-it-fix-excel">What Is a BOM (Byte Order Mark) and Why Does It Fix Excel?</h3>
 
 <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">BOM</span> <span class="o">=</span> <span class="nx">encodeDownloadFileInUTF8</span> <span class="p">?</span> <span class="p">[</span><span class="dl">"</span><span class="se">\</span><span class="s2">uFEFF</span><span class="dl">"</span><span class="p">]</span> <span class="p">:</span> <span class="p">[];</span>
 <span class="kd">const</span> <span class="nx">csvBlob</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Blob</span><span class="p">([...</span><span class="nx">BOM</span><span class="p">,</span> <span class="nx">data</span> <span class="o">||</span> <span class="nx">blob</span><span class="p">],</span> <span class="p">{</span> <span class="p">...</span> <span class="p">});</span>
@@ -153,13 +157,9 @@
 
 <p>But it got repurposed as a convention. When <code class="language-plaintext highlighter-rouge">\uFEFF</code> is encoded in UTF-8, it produces a specific three-byte sequence at the start of the file: <code class="language-plaintext highlighter-rouge">EF BB BF</code>. Excel on Windows recognises these exact bytes as a signal meaning <em>“this file is UTF-8.”</em> It has nothing to do with byte order anymore — Excel just looks for those three bytes, and if it finds them, it stops guessing and decodes the whole file as UTF-8.</p>
 
-<p>When Excel on Windows opens a CSV by double-clicking it, it doesn’t receive any encoding metadata from the browser. It just sees a file sitting on disk with bytes in it. So it falls back to guessing — and its default guess is a legacy encoding like Windows-1252, not UTF-8.</p>
-
-<p>The BOM bypasses this entirely. Excel reads the first few bytes of the file, sees <code class="language-plaintext highlighter-rouge">\uFEFF</code>, and knows to decode everything that follows as UTF-8. The emojis render correctly.</p>
-
 <p><strong>The BOM is what actually fixed the bug.</strong> It survives the journey from browser to disk to Excel because it lives inside the file itself — not in any header or metadata that gets stripped away.</p>
 
-<h3 id="the-good-practice-addition-charsetutf-8-in-the-mime-type">The Good Practice Addition: <code class="language-plaintext highlighter-rouge">charset=utf-8</code> in the MIME Type</h3>
+<h3 id="does-charsetutf-8-in-the-mime-type-fix-the-problem">Does <code class="language-plaintext highlighter-rouge">charset=utf-8</code> in the MIME Type Fix the Problem?</h3>
 
 <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">type</span><span class="p">:</span> <span class="s2">`text/csv;charset=utf-8;`</span>
 </code></pre></div></div>
@@ -221,8 +221,6 @@
 
 <h2 id="the-mental-model-simplified">The Mental Model, Simplified</h2>
 
-<p>If you want one clean way to remember how all of this fits together:</p>
-
 <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Character  →  [Character Set]  →  Code Point Number  →  [Encoding]  →  Bytes in memory/file
 
    "A"     →    Unicode        →        65            →    UTF-8     →   01000001
@@ -248,21 +246,44 @@
 
 <hr />
 
-<p><em>Co-written with AI.</em></p>]]></content><author><name>Samrat Dutta Roy</name></author><category term="javascript" /><category term="encoding" /><category term="utf-8" /><category term="frontend" /><category term="debugging" /><summary type="html"><![CDATA[You've typed charset=utf-8 a hundred times. But do you know what it actually does? A real emoji bug in a CSV export taught me everything.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://dutta-roy-samrat.github.io/assets/images/notion-cover.png" /><media:content medium="image" url="https://dutta-roy-samrat.github.io/assets/images/notion-cover.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">The Great Node.js Myth: Is It Really Single-Threaded?</title><link href="https://dutta-roy-samrat.github.io/posts/the-great-nodejs-myth/" rel="alternate" type="text/html" title="The Great Node.js Myth: Is It Really Single-Threaded?" /><published>2026-05-20T00:00:00+05:30</published><updated>2026-05-20T00:00:00+05:30</updated><id>https://dutta-roy-samrat.github.io/posts/the-great-nodejs-myth</id><content type="html" xml:base="https://dutta-roy-samrat.github.io/posts/the-great-nodejs-myth/"><![CDATA[<p>“Is Node.js single-threaded?”</p>
+<h2 id="frequently-asked-questions">Frequently Asked Questions</h2>
 
-<p>It’s one of those interview questions that sounds straightforward. You’ve probably heard the answer thrown around confidently in videos, tutorials, and bootcamps — <em>“Yes! Node.js is single-threaded. That’s its whole thing.”</em></p>
+<p><strong>What is UTF-8 encoding?</strong>
+UTF-8 is a variable-width character encoding system that converts Unicode code points into bytes. It uses 1 byte for basic ASCII characters and up to 4 bytes for emojis and rare symbols. It is the most widely used encoding on the web.</p>
 
-<p>Except that’s not the full picture. And in an interview, giving that answer will cost you.</p>
+<p><strong>What is the difference between a character set and an encoding?</strong>
+A character set (like Unicode or ASCII) maps characters to unique numbers called code points. An encoding (like UTF-8) defines the rules for converting those code point numbers into actual bytes stored in memory or files. UTF-8 is an encoding of the Unicode character set.</p>
+
+<p><strong>Why does <code class="language-plaintext highlighter-rouge">&lt;meta charset="UTF-8"&gt;</code> need to be in every HTML file?</strong>
+Without it, the browser has to guess how to interpret the file’s bytes. If the guess is wrong, characters render as garbage — especially accented letters, non-Latin scripts, and emojis. Declaring <code class="language-plaintext highlighter-rouge">charset=utf-8</code> tells the browser exactly which rules to use.</p>
+
+<p><strong>What is a Byte Order Mark (BOM) and when do you need it?</strong>
+A BOM (<code class="language-plaintext highlighter-rouge">\uFEFF</code>) is a special invisible character prepended to a file’s bytes. In UTF-8 files, it encodes as <code class="language-plaintext highlighter-rouge">EF BB BF</code> and signals to applications like Excel on Windows that the file is UTF-8 encoded. It is particularly important when generating CSVs that users will open in Excel, since Excel does not reliably read the MIME type charset declaration after a file is saved to disk.</p>
+
+<p><strong>Why do only some emojis break in Excel CSVs?</strong>
+Excel on Windows defaults to a legacy encoding (like Windows-1252) when opening CSVs without explicit encoding signals. Emojis that happen to fall within that legacy encoding’s range display by accident. Emojis requiring 4-byte UTF-8 sequences — outside the legacy encoding’s range entirely — come out as garbled characters.</p>
+
+<hr />
+
+<p><em>Co-written with AI.</em></p>]]></content><author><name>Samrat Dutta Roy</name></author><category term="utf-8" /><category term="character encoding" /><category term="unicode" /><category term="javascript" /><category term="csv export" /><category term="byte order mark" /><category term="BOM" /><category term="charset" /><category term="emoji encoding" /><category term="frontend" /><category term="debugging" /><summary type="html"><![CDATA[What is UTF-8 encoding and why does it matter? A real emoji bug in a CSV export — and two lines of code that fixed it — explains character encoding, Unicode, the Byte Order Mark, and why charset=utf-8 alone isn't always enough.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://dutta-roy-samrat.github.io/assets/images/utf8-encoding.webp" /><media:content medium="image" url="https://dutta-roy-samrat.github.io/assets/images/utf8-encoding.webp" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Is Node.js Single-Threaded? The Complete Answer Explained</title><link href="https://dutta-roy-samrat.github.io/posts/is-nodejs-single-threaded-the-complete-answer-explained/" rel="alternate" type="text/html" title="Is Node.js Single-Threaded? The Complete Answer Explained" /><published>2026-05-20T00:00:00+05:30</published><updated>2026-05-20T00:00:00+05:30</updated><id>https://dutta-roy-samrat.github.io/posts/is-nodejs-single-threaded-the-complete-answer-explained</id><content type="html" xml:base="https://dutta-roy-samrat.github.io/posts/is-nodejs-single-threaded-the-complete-answer-explained/"><![CDATA[<blockquote>
+  <p><strong>Direct answer:</strong> Node.js is neither purely single-threaded nor purely multi-threaded. JavaScript execution runs on a single main thread, but Node.js as a runtime uses multiple background threads via libuv for I/O operations. Worker Threads and the Cluster Module enable true parallelism when needed.</p>
+</blockquote>
+
+<p>“Is Node.js single-threaded?”</p>
+
+<p>It’s one of those <strong>Node.js interview questions</strong> that sounds straightforward. You’ve probably heard the answer thrown around confidently in videos, tutorials, and bootcamps — <em>“Yes! Node.js is single-threaded. That’s its whole thing.”</em></p>
+
+<p>Except that’s not the full picture. And in an interview — or in production — giving that answer will cost you.</p>
 
 <p>Answer “yes” — you’re wrong. Answer “no” — also wrong.</p>
 
 <p>The accurate answer is: <strong>JavaScript execution in Node.js is single-threaded, but Node.js as a runtime environment is multi-threaded.</strong></p>
 
-<p>That single sentence is the difference between someone who has used Node.js and someone who truly understands it. Let’s break it down — slowly, with no hand-waving.</p>
+<p>That single sentence is the difference between someone who has used Node.js and someone who truly understands the <strong>Node.js architecture</strong>. Let’s break it down — slowly, with no hand-waving.</p>
 
 <hr />
 
-<h2 id="first-lets-talk-about-threads">First, Let’s Talk About Threads</h2>
+<h2 id="what-is-a-thread-and-why-does-it-matter-in-nodejs">What Is a Thread and Why Does It Matter in Node.js?</h2>
 
 <p>Before we even get to Node.js, it helps to understand what a thread actually is.</p>
 
@@ -274,7 +295,7 @@
 
 <hr />
 
-<h2 id="1-the-single-threaded-part-your-javascript-code">1. The Single-Threaded Part: Your JavaScript Code</h2>
+<h2 id="1-why-is-javascript-in-nodejs-single-threaded">1. Why Is JavaScript in Node.js Single-Threaded?</h2>
 
 <p>When you write JavaScript in Node.js — your route handlers, your business logic, your <code class="language-plaintext highlighter-rouge">async/await</code> functions — all of it runs on a single <strong>main thread</strong>.</p>
 
@@ -305,9 +326,7 @@
 
 <hr />
 
-<h2 id="2-the-multi-threaded-part-whats-happening-behind-the-curtain">2. The Multi-Threaded Part: What’s Happening Behind the Curtain</h2>
-
-<p>Here’s where it gets interesting.</p>
+<h2 id="2-how-does-nodejs-handle-multiple-requests-without-freezing">2. How Does Node.js Handle Multiple Requests Without Freezing?</h2>
 
 <p>If JavaScript is single-threaded, how does a Node.js server handle reading files, querying a database, hashing passwords, and responding to hundreds of users — all seemingly at the same time — without freezing?</p>
 
@@ -358,7 +377,7 @@
 
 <hr />
 
-<h2 id="3-what-if-you-actually-need-parallel-javascript">3. What If You Actually Need Parallel JavaScript?</h2>
+<h2 id="3-can-nodejs-run-javascript-in-parallel-worker-threads-explained">3. Can Node.js Run JavaScript in Parallel? Worker Threads Explained</h2>
 
 <p>libuv handles system-level I/O in the background automatically. But what if your bottleneck isn’t file reading or database queries — what if it’s pure, heavy JavaScript computation?</p>
 
@@ -366,7 +385,7 @@
 
 <p>For this, Node.js gives you two native tools:</p>
 
-<h3 id="worker-threads">Worker Threads</h3>
+<h3 id="what-are-worker-threads-in-nodejs">What Are Worker Threads in Node.js?</h3>
 
 <p>The <code class="language-plaintext highlighter-rouge">worker_threads</code> module lets you spin up a completely separate V8 engine and Call Stack inside your process. You can send the heavy computation to a Worker, and the operating system will schedule that Worker onto a separate, idle CPU core.</p>
 
@@ -383,7 +402,7 @@
 
 <p>Your main thread stays at 0% utilisation and keeps serving web traffic while the Worker grinds through the computation on another core. Workers in the same process can even share raw memory directly using <code class="language-plaintext highlighter-rouge">SharedArrayBuffer</code> — no costly data copying between threads.</p>
 
-<h3 id="the-cluster-module">The Cluster Module</h3>
+<h3 id="what-does-the-nodejs-cluster-module-do">What Does the Node.js Cluster Module Do?</h3>
 
 <p>While Worker Threads add parallelism inside a single Node.js process, the <strong>Cluster Module</strong> goes a level higher — it duplicates your entire application across multiple CPU cores.</p>
 
@@ -407,7 +426,7 @@
 
 <hr />
 
-<h2 id="4-the-trap-that-catches-senior-developers-too">4. The Trap That Catches Senior Developers Too</h2>
+<h2 id="4-the-thread-multiplication-trap-that-breaks-production-servers">4. The Thread Multiplication Trap That Breaks Production Servers</h2>
 
 <p>Here’s something that even experienced engineers get wrong when they first combine these two tools.</p>
 
@@ -429,17 +448,17 @@
 
 <hr />
 
-<h2 id="5-how-this-shapes-real-production-architecture">5. How This Shapes Real Production Architecture</h2>
+<h2 id="5-nodejs-in-production-pm2-vs-aws-load-balancer">5. Node.js in Production: PM2 vs AWS Load Balancer</h2>
 
 <p>Understanding Node.js threading isn’t just interview trivia — it directly shapes how you architect systems at scale.</p>
 
-<h3 id="pm2--the-process-manager">PM2 — The Process Manager</h3>
+<h3 id="what-is-pm2-and-when-should-you-use-it">What Is PM2 and When Should You Use It?</h3>
 
 <p><strong>PM2</strong> is a tool you install on a server that manages your Node.js processes. It handles the Cluster Module automatically (<code class="language-plaintext highlighter-rouge">pm2 start app.js -i max</code> spawns one process per CPU core), restarts crashed instances in milliseconds, and keeps your app alive through server reboots.</p>
 
 <p>It’s the go-to solution for a single VPS or bare-metal Linux server.</p>
 
-<h3 id="aws-application-load-balancer">AWS Application Load Balancer</h3>
+<h3 id="pm2-vs-aws-application-load-balancer-whats-the-difference">PM2 vs AWS Application Load Balancer: What’s the Difference?</h3>
 
 <p>An <strong>AWS ALB</strong> operates at a completely different level. It doesn’t know or care about threads or cores inside your application. Its job is to distribute incoming internet traffic across a fleet of completely separate machines or containers.</p>
 
@@ -487,9 +506,7 @@
 
 <hr />
 
-<h2 id="putting-it-all-together">Putting It All Together</h2>
-
-<p>If someone asks you “Is Node.js single-threaded?” in an interview — this is the mental model you want to have ready:</p>
+<h2 id="summary-nodejs-threading-model-at-a-glance">Summary: Node.js Threading Model at a Glance</h2>
 
 <table>
   <thead>
@@ -524,4 +541,23 @@
 
 <hr />
 
-<p><em>Co-written with AI.</em></p>]]></content><author><name>Samrat Dutta Roy</name></author><category term="nodejs" /><category term="backend" /><category term="javascript" /><category term="architecture" /><summary type="html"><![CDATA[Yes and no — and that's exactly why it trips up so many engineers in interviews. Here's a deep dive into what's really happening under the hood.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://dutta-roy-samrat.github.io/assets/images/notion-cover.png" /><media:content medium="image" url="https://dutta-roy-samrat.github.io/assets/images/notion-cover.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>
+<h2 id="frequently-asked-questions">Frequently Asked Questions</h2>
+
+<p><strong>Is Node.js single-threaded or multi-threaded?</strong>
+Node.js JavaScript execution is single-threaded — one Call Stack, one Event Loop. But the Node.js runtime uses a multi-threaded background thread pool (via libuv) for I/O operations like file reads, database queries, and cryptography.</p>
+
+<p><strong>What is the Node.js Event Loop?</strong>
+The Event Loop is the mechanism that allows Node.js to perform non-blocking I/O despite running JavaScript on a single thread. It continuously checks the Callback Queue and executes pending callbacks when the Call Stack is empty.</p>
+
+<p><strong>What is libuv in Node.js?</strong>
+libuv is a C++ library that Node.js uses to handle asynchronous I/O operations. It maintains a background thread pool of 8 threads by default, which handle tasks like file system access and cryptographic functions without blocking the main JavaScript thread.</p>
+
+<p><strong>When should you use Worker Threads vs the Cluster Module?</strong>
+Use Worker Threads for CPU-bound tasks (heavy computation) within a single application process. Use the Cluster Module to scale across multiple CPU cores by running independent copies of your entire application. Avoid combining them without careful thread budgeting.</p>
+
+<p><strong>What does “blocking the Event Loop” mean?</strong>
+Blocking the Event Loop means running a synchronous operation on the main thread that takes a long time to complete — like a heavy <code class="language-plaintext highlighter-rouge">while</code> loop or synchronous file read. While it runs, Node.js cannot process any other requests, effectively freezing the server.</p>
+
+<hr />
+
+<p><em>Co-written with AI.</em></p>]]></content><author><name>Samrat Dutta Roy</name></author><category term="nodejs" /><category term="single-threaded" /><category term="event loop" /><category term="libuv" /><category term="worker threads" /><category term="cluster module" /><category term="backend" /><category term="javascript" /><category term="node.js architecture" /><category term="interview questions" /><summary type="html"><![CDATA[Is Node.js single-threaded or multi-threaded? The real answer is both — and understanding why will change how you write backend code. A deep dive into the Event Loop, libuv thread pool, Worker Threads, and Cluster Module.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://dutta-roy-samrat.github.io/assets/images/nodejs-threading.webp" /><media:content medium="image" url="https://dutta-roy-samrat.github.io/assets/images/nodejs-threading.webp" xmlns:media="http://search.yahoo.com/mrss/" /></entry></feed>

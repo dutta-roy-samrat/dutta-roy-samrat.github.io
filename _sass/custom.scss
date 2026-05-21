@@ -50,6 +50,18 @@
   --navbar-bg:        rgba(255, 255, 255, 0.8);
   --card-bg:          #ffffff;
   --shadow-sm:        0px 1px 2px rgba(0, 0, 0, 0.05), 0px 1px 3px rgba(0, 0, 0, 0.05);
+
+  /* Syntax Highlighting Colors (Notion Light Mode) */
+  --syntax-tag:       #0550ae;
+  --syntax-attr:      #953800;
+  --syntax-str:       #116329;
+  --syntax-comment:   #6e7781;
+  --syntax-keyword:   #cf222e;
+  --syntax-number:    #0550ae;
+  --syntax-operator:  #24292f;
+  --syntax-builtin:   #8250df;
+  --syntax-fn:        #8250df;
+  --syntax-punctuation: #24292f;
 }
 
 [data-theme="dark"] {
@@ -64,7 +76,7 @@
   --hover-bg-active:  rgba(255, 255, 255, 0.1);
   
   --code-bg:          rgba(135, 131, 120, 0.18);
-  --code-text:        #ff7369;
+  --code-text:        #e5c07b;
   
   /* Notion Select/Tag Pastel Colors (Dark Mode) */
   --pastel-gray-bg:   #2b2b2b;
@@ -98,6 +110,18 @@
   --navbar-bg:        rgba(25, 25, 25, 0.8);
   --card-bg:          #202020;
   --shadow-sm:        0px 1px 3px rgba(0, 0, 0, 0.15);
+
+  /* Syntax Highlighting Colors (High-Contrast One Dark Mode) */
+  --syntax-tag:       #e06c75;
+  --syntax-attr:      #d19a66;
+  --syntax-str:       #98c379;
+  --syntax-comment:   #768390;
+  --syntax-keyword:   #c678dd;
+  --syntax-number:    #d19a66;
+  --syntax-operator:  #abb2bf;
+  --syntax-builtin:   #61afef;
+  --syntax-fn:        #61afef;
+  --syntax-punctuation: #abb2bf;
 }
 
 /* ── Base Reset & Elements ──────────────────────────────────────────────── */
@@ -870,6 +894,22 @@ pre code {
   border: none;
   font-size: 13.5px;
   color: var(--text);
+}
+
+/* Rouge Code Syntax Highlighting Overrides */
+.highlight, pre.highlight {
+  .c, .c1, .ch, .cm, .cp, .cpf, .cs { color: var(--syntax-comment) !important; font-style: italic; }
+  .k, .kc, .kd, .kn, .kp, .kr, .kt, .kv { color: var(--syntax-keyword) !important; font-weight: 500; }
+  .nt { color: var(--syntax-tag) !important; font-weight: 500; }
+  .na { color: var(--syntax-attr) !important; }
+  .s, .s1, .s2, .sa, .sb, .sc, .sd, .se, .sh, .si, .sx, .sr, .dl { color: var(--syntax-str) !important; }
+  .m, .mb, .mdf, .me, .mf, .mh, .mi, .il, .mo, .mx { color: var(--syntax-number) !important; }
+  .o, .ow { color: var(--syntax-operator) !important; }
+  .p { color: var(--syntax-punctuation) !important; }
+  .nb, .bp { color: var(--syntax-builtin) !important; }
+  .nf, .fm { color: var(--syntax-fn) !important; }
+  .nc, .no, .nd, .ni, .nl, .nn { color: var(--syntax-tag) !important; }
+  .nv, .vc, .vg, .vi, .vm, .nx { color: var(--text) !important; }
 }
 
 /* Blockquote */
