@@ -1,4 +1,254 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.5">Jekyll</generator><link href="https://dutta-roy-samrat.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://dutta-roy-samrat.github.io/" rel="alternate" type="text/html" /><updated>2026-05-20T13:09:30+05:30</updated><id>https://dutta-roy-samrat.github.io/feed.xml</id><title type="html">My Dev Blog</title><subtitle>Thoughts on code, tools, and tech.</subtitle><author><name>Samrat Dutta Roy</name></author><entry><title type="html">The Great Node.js Myth: Is It Really Single-Threaded?</title><link href="https://dutta-roy-samrat.github.io/posts/the-great-nodejs-myth/" rel="alternate" type="text/html" title="The Great Node.js Myth: Is It Really Single-Threaded?" /><published>2026-05-20T00:00:00+05:30</published><updated>2026-05-20T00:00:00+05:30</updated><id>https://dutta-roy-samrat.github.io/posts/the-great-nodejs-myth</id><content type="html" xml:base="https://dutta-roy-samrat.github.io/posts/the-great-nodejs-myth/"><![CDATA[<p>“Is Node.js single-threaded?”</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2026-05-21T08:37:10+05:30</updated><id>http://localhost:4000/feed.xml</id><title type="html">My Dev Blog</title><subtitle>Thoughts on code, tools, and tech.</subtitle><author><name>Samrat Dutta Roy</name></author><entry><title type="html">What Does UTF-8 Actually Mean? A Real Bug That Finally Made It Click</title><link href="http://localhost:4000/posts/what-does-utf-8-actually-mean-a-real-bug-that-finally-made-it-click/" rel="alternate" type="text/html" title="What Does UTF-8 Actually Mean? A Real Bug That Finally Made It Click" /><published>2026-05-21T00:00:00+05:30</published><updated>2026-05-21T00:00:00+05:30</updated><id>http://localhost:4000/posts/what-does-utf-8-actually-mean-a-real-bug-that-finally-made-it-click</id><content type="html" xml:base="http://localhost:4000/posts/what-does-utf-8-actually-mean-a-real-bug-that-finally-made-it-click/"><![CDATA[<p>You’ve typed this line dozens of times without thinking about it:</p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">"UTF-8"</span><span class="nt">&gt;</span>
+</code></pre></div></div>
+
+<p>It sits at the top of every HTML file. Every tutorial tells you to put it there. Nobody really explains what it means — or why it matters.</p>
+
+<p>I didn’t truly understand it until a bug involving emojis and a CSV download forced me to.</p>
+
+<hr />
+
+<h2 id="the-bug">The Bug</h2>
+
+<p>I was adding an emoji picker to an existing message input feature. Nothing fancy — users type messages, optionally add an emoji, and the messages get stored. There was also an existing feature that let users download all messages as a CSV file, which they’d open in Excel.</p>
+
+<p>The feature worked. Or so I thought.</p>
+
+<p>When I tested it end-to-end, I noticed something strange in the downloaded CSV: <strong>some emojis displayed correctly in Excel, and some showed up as garbled nonsense</strong> — strange boxes, question marks, or completely wrong characters.</p>
+
+<p>Same code. Same download function. Some emojis fine, some broken.</p>
+
+<p>I had no idea where to start.</p>
+
+<hr />
+
+<h2 id="going-down-the-rabbit-hole">Going Down the Rabbit Hole</h2>
+
+<p>The fix eventually came down to two small additions to the CSV download logic:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">BOM</span> <span class="o">=</span> <span class="nx">encodeDownloadFileInUTF8</span> <span class="p">?</span> <span class="p">[</span><span class="dl">"</span><span class="se">\</span><span class="s2">uFEFF</span><span class="dl">"</span><span class="p">]</span> <span class="p">:</span> <span class="p">[];</span>
+
+<span class="kd">const</span> <span class="nx">csvBlob</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Blob</span><span class="p">([...</span><span class="nx">BOM</span><span class="p">,</span> <span class="nx">data</span> <span class="o">||</span> <span class="nx">blob</span><span class="p">],</span> <span class="p">{</span>
+  <span class="na">type</span><span class="p">:</span> <span class="s2">`text/csv;</span><span class="p">${</span><span class="nx">encodeDownloadFileInUTF8</span> <span class="p">?</span> <span class="dl">"</span><span class="s2">charset=utf-8;</span><span class="dl">"</span> <span class="p">:</span> <span class="dl">""</span><span class="p">}</span><span class="s2">`</span><span class="p">,</span>
+<span class="p">});</span>
+</code></pre></div></div>
+
+<p>Two things were added:</p>
+<ol>
+  <li>A mysterious <code class="language-plaintext highlighter-rouge">"\uFEFF"</code> prepended to the file — called a <strong>BOM</strong></li>
+  <li><code class="language-plaintext highlighter-rouge">charset=utf-8</code> added to the MIME type</li>
+</ol>
+
+<p>Both fixes worked. The emojis rendered correctly in Excel.</p>
+
+<p>But I refused to just move on without understanding <em>why</em>. What is a BOM? What does <code class="language-plaintext highlighter-rouge">charset=utf-8</code> actually tell the browser? And why were only <em>some</em> emojis broken in the first place?</p>
+
+<p>Answering those questions meant going all the way back to basics — to how computers represent text at all.</p>
+
+<hr />
+
+<h2 id="how-does-a-computer-even-store-a-letter">How Does a Computer Even Store a Letter?</h2>
+
+<p>Here’s something that seems obvious once you hear it, but nobody spells out clearly:</p>
+
+<p><strong>Computers only understand numbers.</strong> Everything in memory — images, videos, code, text — is ultimately stored as binary digits: ones and zeros.</p>
+
+<p>A number like <code class="language-plaintext highlighter-rouge">65</code> is easy. In binary it’s <code class="language-plaintext highlighter-rouge">01000001</code>. Done.</p>
+
+<p>But what about the letter <code class="language-plaintext highlighter-rouge">"A"</code>? You can’t directly convert a character to binary the way you can a number. A character isn’t a number — it’s a symbol.</p>
+
+<p>So how does it work?</p>
+
+<p>The answer is: <strong>we agreed on a map.</strong></p>
+
+<hr />
+
+<h2 id="character-sets-the-map-from-symbol-to-number">Character Sets: The Map From Symbol to Number</h2>
+
+<p>A <strong>character set</strong> (or charset) is essentially a lookup table. It maps every character — letters, digits, punctuation, symbols — to a unique number. Once a character has a number, that number can be converted to binary, and the machine can store it.</p>
+
+<p>The two most important character sets you’ll encounter:</p>
+
+<p><strong>ASCII</strong> was one of the earliest and simplest. It maps 128 characters to numbers 0–127. The letter <code class="language-plaintext highlighter-rouge">"A"</code> is 65. <code class="language-plaintext highlighter-rouge">"B"</code> is 66. A space is 32. It covers the basic English alphabet, digits, and common punctuation — nothing more.</p>
+
+<p><strong>Unicode</strong> is the modern, universal standard. Instead of 128 characters, it maps over 140,000 of them — every letter from every human language, mathematical symbols, and yes, emojis. The 😊 emoji, for example, is Unicode code point <code class="language-plaintext highlighter-rouge">U+1F60A</code>. In JavaScript, you can verify this:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="dl">"</span><span class="s2">A</span><span class="dl">"</span><span class="p">.</span><span class="nx">charCodeAt</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>   <span class="c1">// 65  — the number Unicode (and ASCII) maps "A" to</span>
+<span class="dl">"</span><span class="s2">😊</span><span class="dl">"</span><span class="p">.</span><span class="nx">codePointAt</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span> <span class="c1">// 128522 — the number Unicode maps this emoji to</span>
+</code></pre></div></div>
+
+<p>So the character set answers: <em>“What number does this character correspond to?”</em></p>
+
+<p>But there’s a second question: <em>“How do we actually store that number in bytes?”</em></p>
+
+<p>That’s where <strong>encoding</strong> comes in.</p>
+
+<hr />
+
+<h2 id="utf-8-the-encoding-that-translates-numbers-into-bytes">UTF-8: The Encoding That Translates Numbers Into Bytes</h2>
+
+<p><strong>UTF-8</strong> is not a character set. It’s an <strong>encoding</strong> — a set of rules for turning Unicode code point numbers into actual bytes that get written to memory or a file.</p>
+
+<p>Here’s the key insight that makes UTF-8 clever:</p>
+
+<ul>
+  <li>Simple characters (basic English letters, digits) that have small code point numbers get stored in <strong>1 byte</strong></li>
+  <li>Characters from other languages, accented letters, and common symbols use <strong>2 or 3 bytes</strong></li>
+  <li>Emojis and rare symbols use <strong>4 bytes</strong></li>
+</ul>
+
+<p>This is what “variable-width encoding” means. UTF-8 uses as few bytes as necessary for each character.</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>"A"  → code point 65     → UTF-8: 1 byte  → 01000001
+"é"  → code point 233    → UTF-8: 2 bytes → 11000011 10101001
+"中" → code point 20013  → UTF-8: 3 bytes → 11100100 10111000 10001101
+"😊" → code point 128522 → UTF-8: 4 bytes → 11110000 10011111 10011000 10001010
+</code></pre></div></div>
+
+<p>This is why UTF-8 became the dominant encoding for the web. It’s backward-compatible with ASCII (the first 128 characters encode identically), it’s space-efficient for English text, and it can represent every character in existence.</p>
+
+<p>When you write <code class="language-plaintext highlighter-rouge">&lt;meta charset="UTF-8"&gt;</code> at the top of your HTML, you’re telling the browser: <em>“When you read this file’s bytes, decode them using UTF-8 rules.”</em></p>
+
+<p>Without that declaration, the browser guesses. And when it guesses wrong, characters break.</p>
+
+<hr />
+
+<h2 id="back-to-the-bug-why-were-only-some-emojis-breaking">Back to the Bug: Why Were Only Some Emojis Breaking?</h2>
+
+<p>Now that the foundation is set, we can diagnose exactly what was happening.</p>
+
+<p>The CSV was being generated and downloaded without explicitly declaring its encoding. Excel, when it opens a CSV, also has to guess the encoding. And Excel’s default assumption — especially on Windows — is not UTF-8. It often defaults to a legacy encoding like <strong>Windows-1252</strong>, which only handles 256 characters.</p>
+
+<p>Here’s why only <em>some</em> emojis broke:</p>
+
+<ul>
+  <li>Simple emojis that happened to fall within the range Excel’s legacy encoding could interpret showed up fine — by accident</li>
+  <li>Emojis with 4-byte UTF-8 sequences that fell completely outside the legacy encoding’s range came out as garbage</li>
+</ul>
+
+<p>It wasn’t a random bug. It was entirely predictable once you understand encoding.</p>
+
+<hr />
+
+<h2 id="the-fix-explained">The Fix, Explained</h2>
+
+<p>Two things were added to the code. They look similar in purpose but operate at completely different layers — and only one of them actually fixed the bug.</p>
+
+<h3 id="the-real-fix-the-bom--ufeff">The Real Fix: The BOM — <code class="language-plaintext highlighter-rouge">"\uFEFF"</code></h3>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">BOM</span> <span class="o">=</span> <span class="nx">encodeDownloadFileInUTF8</span> <span class="p">?</span> <span class="p">[</span><span class="dl">"</span><span class="se">\</span><span class="s2">uFEFF</span><span class="dl">"</span><span class="p">]</span> <span class="p">:</span> <span class="p">[];</span>
+<span class="kd">const</span> <span class="nx">csvBlob</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Blob</span><span class="p">([...</span><span class="nx">BOM</span><span class="p">,</span> <span class="nx">data</span> <span class="o">||</span> <span class="nx">blob</span><span class="p">],</span> <span class="p">{</span> <span class="p">...</span> <span class="p">});</span>
+</code></pre></div></div>
+
+<p><strong>BOM</strong> stands for <strong>Byte Order Mark</strong>. It’s a special invisible character (<code class="language-plaintext highlighter-rouge">U+FEFF</code>) prepended to the very start of a file.</p>
+
+<p>To understand what the BOM actually is, you need a tiny bit of backstory.</p>
+
+<p>When a number takes up multiple bytes in memory, there are two valid ways to arrange those bytes — most significant byte first (big-endian) or least significant byte first (little-endian). Both are legitimate. But if the reader doesn’t know which order was used, they’ll misread the number entirely.</p>
+
+<p>UTF-16 and UTF-32 store characters in multi-byte chunks, so byte order matters for them. The character <code class="language-plaintext highlighter-rouge">U+FEFF</code> was placed at the very start of files so that readers could detect which byte order was used — if they read it as <code class="language-plaintext highlighter-rouge">FE FF</code> it’s big-endian, if they read it as <code class="language-plaintext highlighter-rouge">FF FE</code> it’s little-endian. That’s where the name <strong>Byte Order Mark</strong> comes from.</p>
+
+<p><strong>UTF-8 doesn’t actually need this.</strong> It processes one byte at a time and builds up characters using its own rules, so byte order is never ambiguous. The BOM has no technical purpose in UTF-8.</p>
+
+<p>But it got repurposed as a convention. When <code class="language-plaintext highlighter-rouge">\uFEFF</code> is encoded in UTF-8, it produces a specific three-byte sequence at the start of the file: <code class="language-plaintext highlighter-rouge">EF BB BF</code>. Excel on Windows recognises these exact bytes as a signal meaning <em>“this file is UTF-8.”</em> It has nothing to do with byte order anymore — Excel just looks for those three bytes, and if it finds them, it stops guessing and decodes the whole file as UTF-8.</p>
+
+<p>When Excel on Windows opens a CSV by double-clicking it, it doesn’t receive any encoding metadata from the browser. It just sees a file sitting on disk with bytes in it. So it falls back to guessing — and its default guess is a legacy encoding like Windows-1252, not UTF-8.</p>
+
+<p>The BOM bypasses this entirely. Excel reads the first few bytes of the file, sees <code class="language-plaintext highlighter-rouge">\uFEFF</code>, and knows to decode everything that follows as UTF-8. The emojis render correctly.</p>
+
+<p><strong>The BOM is what actually fixed the bug.</strong> It survives the journey from browser to disk to Excel because it lives inside the file itself — not in any header or metadata that gets stripped away.</p>
+
+<h3 id="the-good-practice-addition-charsetutf-8-in-the-mime-type">The Good Practice Addition: <code class="language-plaintext highlighter-rouge">charset=utf-8</code> in the MIME Type</h3>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">type</span><span class="p">:</span> <span class="s2">`text/csv;charset=utf-8;`</span>
+</code></pre></div></div>
+
+<p>This tells the browser — and any application that reads MIME types — that the content is encoded in UTF-8.</p>
+
+<p>But here’s the honest reality: <strong>for the specific bug we were fixing, this alone would not have helped.</strong></p>
+
+<p>When a user downloads a CSV and opens it by double-clicking, Excel on Windows doesn’t see the MIME type. That information exists at the HTTP/browser layer and gets lost the moment the file is saved to disk. Excel never gets a chance to read it.</p>
+
+<p>So why add it at all? Because not everything that reads your file is Excel:</p>
+
+<ul>
+  <li>A Python script processing the CSV programmatically will read the MIME type and decode correctly</li>
+  <li>An API consuming the file will respect it</li>
+  <li>A browser rendering the CSV directly will use it</li>
+  <li>It documents intent — any tool that <em>does</em> respect MIME types will handle the file correctly</li>
+</ul>
+
+<p>Think of it this way:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th><code class="language-plaintext highlighter-rouge">charset=utf-8</code> in MIME</th>
+      <th>BOM <code class="language-plaintext highlighter-rouge">\uFEFF</code></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Lives in</strong></td>
+      <td>HTTP / MIME headers</td>
+      <td>The file’s actual bytes</td>
+    </tr>
+    <tr>
+      <td><strong>Survives saving to disk</strong></td>
+      <td>❌ No</td>
+      <td>✅ Yes</td>
+    </tr>
+    <tr>
+      <td><strong>Excel on Windows reads it</strong></td>
+      <td>❌ Not reliably</td>
+      <td>✅ Yes</td>
+    </tr>
+    <tr>
+      <td><strong>Programmatic tools read it</strong></td>
+      <td>✅ Yes</td>
+      <td>Mostly ignored</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The MIME type tells tools that <em>ask</em> what encoding this is. The BOM tells tools — like Excel — that <em>don’t bother asking.</em></p>
+
+<p>For this bug, if you had to pick just one: the BOM was the fix. The <code class="language-plaintext highlighter-rouge">charset=utf-8</code> was the right thing to add alongside it — but it was good practice, not the cure.</p>
+
+<hr />
+
+<h2 id="the-mental-model-simplified">The Mental Model, Simplified</h2>
+
+<p>If you want one clean way to remember how all of this fits together:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Character  →  [Character Set]  →  Code Point Number  →  [Encoding]  →  Bytes in memory/file
+
+   "A"     →    Unicode        →        65            →    UTF-8     →   01000001
+   "😊"    →    Unicode        →      128522          →    UTF-8     →   4 bytes
+</code></pre></div></div>
+
+<ul>
+  <li><strong>Character Set (Unicode):</strong> gives every symbol a unique number</li>
+  <li><strong>Encoding (UTF-8):</strong> defines how to turn that number into actual bytes</li>
+  <li><strong>BOM (<code class="language-plaintext highlighter-rouge">\uFEFF</code>):</strong> a signal baked into the file’s bytes — survives to disk, read by Excel</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">charset=utf-8</code>:</strong> a signal in the MIME/HTTP layer — read by browsers and programmatic tools, but lost when the file is saved locally</li>
+</ul>
+
+<hr />
+
+<h2 id="what-to-take-away">What to Take Away</h2>
+
+<p>The next time you see <code class="language-plaintext highlighter-rouge">&lt;meta charset="UTF-8"&gt;</code> or <code class="language-plaintext highlighter-rouge">charset=utf-8</code> in a content type header, you’ll know exactly what it’s doing. It’s not boilerplate. It’s a contract — you’re telling every tool in the chain: <em>“Here’s the encoding I used to write these bytes. Please use the same rules to read them.”</em></p>
+
+<p>When that contract is missing or mismatched, text breaks. Sometimes obviously, sometimes only for edge cases like 4-byte emoji sequences that a legacy encoding never anticipated.</p>
+
+<p>A small invisible character at the start of a file fixed my bug. Now I’ll never forget what it means.</p>
+
+<hr />
+
+<p><em>Co-written with AI.</em></p>]]></content><author><name>Samrat Dutta Roy</name></author><category term="javascript" /><category term="encoding" /><category term="utf-8" /><category term="frontend" /><category term="debugging" /><summary type="html"><![CDATA[You've typed charset=utf-8 a hundred times. But do you know what it actually does? A real emoji bug in a CSV export taught me everything.]]></summary></entry><entry><title type="html">The Great Node.js Myth: Is It Really Single-Threaded?</title><link href="http://localhost:4000/posts/the-great-nodejs-myth/" rel="alternate" type="text/html" title="The Great Node.js Myth: Is It Really Single-Threaded?" /><published>2026-05-20T00:00:00+05:30</published><updated>2026-05-20T00:00:00+05:30</updated><id>http://localhost:4000/posts/the-great-nodejs-myth</id><content type="html" xml:base="http://localhost:4000/posts/the-great-nodejs-myth/"><![CDATA[<p>“Is Node.js single-threaded?”</p>
 
 <p>It’s one of those interview questions that sounds straightforward. You’ve probably heard the answer thrown around confidently in videos, tutorials, and bootcamps — <em>“Yes! Node.js is single-threaded. That’s its whole thing.”</em></p>
 
