@@ -1,10 +1,22 @@
 ---
 layout: post
 title: "Why Does Changing DNS Fix High Ping in Valorant? The Real Technical Reason"
-date: 2026-05-21
+date: 2026-05-22
 author: Samrat Dutta Roy
 emoji: "🌐"
-tags: [valorant high ping, fix ping valorant, dns ping fix, cloudflare dns gaming, google dns vs cloudflare, anycast routing, EDNS client subnet, networking, valorant lag fix, dns 1.1.1.1 gaming]
+tags:
+  [
+    valorant high ping,
+    fix ping valorant,
+    dns ping fix,
+    cloudflare dns gaming,
+    google dns vs cloudflare,
+    anycast routing,
+    EDNS client subnet,
+    networking,
+    valorant lag fix,
+    dns 1.1.1.1 gaming,
+  ]
 description: "Why does switching to Cloudflare DNS (1.1.1.1) or Google DNS (8.8.8.8) fix high ping in Valorant? It's not placebo — it's Anycast routing, EDNS Client Subnet, and how your ISP picks network paths. Here's the full technical explanation."
 image: /assets/images/dns-ping-valorant.png
 redirect_from:
@@ -17,7 +29,7 @@ redirect_from:
 
 If you've spent any time in gaming forums looking for ways to **fix high ping in Valorant**, you've probably seen this advice thrown around:
 
-*"Bro just switch to 8.8.8.8"* or *"No no, 1.1.1.1 is way better"*
+_"Bro just switch to 8.8.8.8"_ or _"No no, 1.1.1.1 is way better"_
 
 And the bizarre thing is — it sometimes works. Ping goes from spiking at 180ms to sitting clean at 40ms, just because you changed two numbers in your network settings.
 
@@ -27,7 +39,7 @@ But I tried it. The spikes disappeared. Ping went stable.
 
 From that point it became my go-to fix. But here's the thing — it doesn't always work. Sometimes I'd switch to Cloudflare and still get spikes. Sometimes the spikes would come back on Cloudflare an hour later. Sometimes switching back to Google fixed it, sometimes it didn't.
 
-That inconsistency is what pushed me to actually understand what's happening. Because if you understand *why* it sometimes works, you also understand *why* it sometimes doesn't.
+That inconsistency is what pushed me to actually understand what's happening. Because if you understand _why_ it sometimes works, you also understand _why_ it sometimes doesn't.
 
 The answer is far more interesting than "Cloudflare is faster."
 
@@ -37,7 +49,7 @@ The answer is far more interesting than "Cloudflare is faster."
 
 Before anything else — DNS itself doesn't affect your in-game ping once you're connected to a match. Let's be clear about that.
 
-DNS is a phonebook. You type `playvalorant.com`, your computer asks a DNS server *"what's the IP address for this?"*, gets an answer, and then connects directly to that IP. The DNS server is out of the picture the moment it hands you the address.
+DNS is a phonebook. You type `playvalorant.com`, your computer asks a DNS server _"what's the IP address for this?"_, gets an answer, and then connects directly to that IP. The DNS server is out of the picture the moment it hands you the address.
 
 So if DNS doesn't sit in the middle of your game connection, why does switching it sometimes change your ping?
 
@@ -55,7 +67,7 @@ Both use a technology called **Anycast routing**. With Anycast, hundreds of serv
 
 The same principle applies to Valorant's game servers. Riot doesn't run one server in one place — they have regional deployments across multiple data centers and infrastructure providers. Multiple IP addresses, multiple edge locations, all serving the same game.
 
-So when you ask a DNS server *"where is Valorant?"*, it doesn't just look up a single fixed answer. It figures out which regional deployment to point you to. And Google and Cloudflare make that decision differently — which brings us to the key technical reason behind all of this.
+So when you ask a DNS server _"where is Valorant?"_, it doesn't just look up a single fixed answer. It figures out which regional deployment to point you to. And Google and Cloudflare make that decision differently — which brings us to the key technical reason behind all of this.
 
 ---
 
@@ -152,4 +164,4 @@ Because network routing is dynamic. A route that was congested an hour ago may b
 
 ---
 
-*Co-written with AI.*
+_Co-written with AI._
