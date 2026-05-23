@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "What is UTF-8 Character Encoding? A Real Bug That Finally Made It Click"
-date: 2026-05-21
+date: 2026-02-18
 author: Samrat Dutta Roy
 emoji: "🔤"
 tags: [utf-8, character encoding, unicode, javascript, csv export, byte order mark, BOM, charset, emoji encoding, frontend, debugging]

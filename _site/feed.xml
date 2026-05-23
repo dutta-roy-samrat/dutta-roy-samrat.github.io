@@ -1,4 +1,287 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.5">Jekyll</generator><link href="https://dutta-roy-samrat.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://dutta-roy-samrat.github.io/" rel="alternate" type="text/html" /><updated>2026-05-22T11:49:38+05:30</updated><id>https://dutta-roy-samrat.github.io/feed.xml</id><title type="html">Samrat Dutta Roy | Tech Blog</title><subtitle>Technical deep-dives on frontend architecture, browser engines, JavaScript internals, and web performance by a Senior Frontend Engineer.</subtitle><author><name>Samrat Dutta Roy</name></author><entry><title type="html">Why Does Changing DNS Fix High Ping in Valorant? The Real Technical Reason</title><link href="https://dutta-roy-samrat.github.io/posts/why-does-changing-dns-fix-high-ping-in-valorant-the-real-technical-reason/" rel="alternate" type="text/html" title="Why Does Changing DNS Fix High Ping in Valorant? The Real Technical Reason" /><published>2026-05-22T00:00:00+05:30</published><updated>2026-05-22T00:00:00+05:30</updated><id>https://dutta-roy-samrat.github.io/posts/why-does-changing-dns-fix-high-ping-in-valorant-the-real-technical-reason</id><content type="html" xml:base="https://dutta-roy-samrat.github.io/posts/why-does-changing-dns-fix-high-ping-in-valorant-the-real-technical-reason/"><![CDATA[<blockquote>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.5">Jekyll</generator><link href="https://dutta-roy-samrat.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://dutta-roy-samrat.github.io/" rel="alternate" type="text/html" /><updated>2026-05-23T11:08:12+05:30</updated><id>https://dutta-roy-samrat.github.io/feed.xml</id><title type="html">Samrat Dutta Roy | Tech Blog</title><subtitle>Technical deep-dives on frontend architecture, browser engines, JavaScript internals, and web performance by a Senior Frontend Engineer.</subtitle><author><name>Samrat Dutta Roy</name></author><entry><title type="html">Functions vs Classes in JavaScript: When to Use Which and Why It Actually Matters</title><link href="https://dutta-roy-samrat.github.io/posts/functions-vs-classes-in-javascript-when-to-use-which-and-why-it-actually-matters/" rel="alternate" type="text/html" title="Functions vs Classes in JavaScript: When to Use Which and Why It Actually Matters" /><published>2026-05-23T00:00:00+05:30</published><updated>2026-05-23T00:00:00+05:30</updated><id>https://dutta-roy-samrat.github.io/posts/functions-vs-classes-in-javascript-when-to-use-which-and-why-it-actually-matters</id><content type="html" xml:base="https://dutta-roy-samrat.github.io/posts/functions-vs-classes-in-javascript-when-to-use-which-and-why-it-actually-matters/"><![CDATA[<blockquote>
+  <p><strong>Direct answer:</strong> Functions and classes are not competing tools — they solve different problems. Functions excel at stateless logic, composition, and modern UI patterns. Classes excel at encapsulating long-lived state, modelling domain entities, and memory-efficient instantiation at scale. The difference comes down to how JavaScript manages memory through the prototype chain, and what your specific use case actually demands.</p>
+</blockquote>
+
+<p>Look at modern software development and a pattern is hard to miss.</p>
+
+<p><strong>React</strong> — the most widely used frontend framework — moved decisively away from class components toward <strong>functional components with Hooks</strong>. The community followed without much resistance.</p>
+
+<p><strong>Django</strong> — one of the most battle-tested backend frameworks in existence — started with only function-based views. Class-based views came later, and to this day a vocal segment of experienced Django developers argue the tradeoff wasn’t worth it — that the inheritance chains made code harder to follow than the boilerplate they replaced.</p>
+
+<p><strong>JavaScript itself</strong> has been trending toward functional patterns for years. Closures, higher-order functions, <code class="language-plaintext highlighter-rouge">map</code>, <code class="language-plaintext highlighter-rouge">filter</code>, <code class="language-plaintext highlighter-rouge">reduce</code> — these are the idioms that define modern JS.</p>
+
+<p>So the reasonable question to ask is: <strong>if functions vs classes is a debate, and functions keep winning in practice — why do classes still exist at all?</strong></p>
+
+<p>The answer isn’t that classes are legacy code waiting to be deprecated. It’s that functions and classes solve genuinely different problems — and understanding which problem each solves requires going a level deeper than syntax.</p>
+
+<hr />
+
+<h2 id="what-is-the-difference-between-a-function-and-a-class-in-javascript">What Is the Difference Between a Function and a Class in JavaScript?</h2>
+
+<p>Ask most developers and you’ll get the standard answer: classes are for <strong>encapsulation</strong> and <strong>abstraction</strong> — bundling state and behaviour together, hiding internal details, modelling real-world entities.</p>
+
+<p>Functions are more <strong>flexible</strong> and <strong>composable</strong> — great for pure logic, transformations, utility work.</p>
+
+<p>That’s not wrong. But it’s incomplete. Because the obvious follow-up is: <em>can’t functions do encapsulation too?</em></p>
+
+<p>Yes. They can. And that’s where things get interesting.</p>
+
+<hr />
+
+<h2 id="can-functions-replace-classes-closures-and-encapsulation-explained">Can Functions Replace Classes? Closures and Encapsulation Explained</h2>
+
+<p>Before ES6 introduced the <code class="language-plaintext highlighter-rouge">class</code> keyword in 2015, JavaScript had no native class syntax. Developers who needed encapsulation and private state used <strong>closures</strong> — functions that trap variables inside their lexical scope and expose only what they choose to expose.</p>
+
+<p>Here’s the same bank account implemented two ways:</p>
+
+<p><strong>The Class approach:</strong></p>
+
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nx">BankAccount</span> <span class="p">{</span>
+  <span class="err">#</span><span class="nx">balance</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// # makes it a truly private field</span>
+
+  <span class="nx">deposit</span><span class="p">(</span><span class="nx">amount</span><span class="p">:</span> <span class="kr">number</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="err">#</span><span class="nx">balance</span> <span class="o">+=</span> <span class="nx">amount</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="nx">getBalance</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="err">#</span><span class="nx">balance</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><strong>The Closure / Factory Function approach:</strong></p>
+
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">createBankAccount</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">balance</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// Trapped in the closure — inaccessible from outside</span>
+
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="nx">deposit</span><span class="p">(</span><span class="na">amount</span><span class="p">:</span> <span class="kr">number</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">balance</span> <span class="o">+=</span> <span class="nx">amount</span><span class="p">;</span>
+    <span class="p">},</span>
+    <span class="nx">getBalance</span><span class="p">()</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nx">balance</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">account</span> <span class="o">=</span> <span class="nx">createBankAccount</span><span class="p">();</span>
+<span class="nx">account</span><span class="p">.</span><span class="nx">deposit</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">account</span><span class="p">.</span><span class="nx">getBalance</span><span class="p">());</span> <span class="c1">// 100</span>
+<span class="c1">// balance is completely inaccessible from outside</span>
+</code></pre></div></div>
+
+<p>Both achieve the same result. Both hide internal state. Both expose only controlled methods.</p>
+
+<p>So again — why do classes exist?</p>
+
+<hr />
+
+<h2 id="the-real-difference-memory-allocation-and-the-javascript-prototype-chain">The Real Difference: Memory Allocation and the JavaScript Prototype Chain</h2>
+
+<p>This is where most explanations stop being vague and start being precise.</p>
+
+<p>When you use the factory function approach, JavaScript creates a <strong>new set of function definitions in memory every single time</strong> you call <code class="language-plaintext highlighter-rouge">createBankAccount</code>. Each instance gets its own copy of <code class="language-plaintext highlighter-rouge">deposit</code> and <code class="language-plaintext highlighter-rouge">getBalance</code> — distinct function objects, each allocated separately in the heap.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">account1</span> <span class="o">=</span> <span class="nx">createBankAccount</span><span class="p">();</span>
+<span class="kd">const</span> <span class="nx">account2</span> <span class="o">=</span> <span class="nx">createBankAccount</span><span class="p">();</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">account1</span><span class="p">.</span><span class="nx">deposit</span> <span class="o">===</span> <span class="nx">account2</span><span class="p">.</span><span class="nx">deposit</span><span class="p">);</span> <span class="c1">// false — different function objects</span>
+</code></pre></div></div>
+
+<p>Here’s what the memory heap actually looks like with 3 instances:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[ Heap Memory ]
+
+account1 ---&gt; { deposit: [Function Ref A], getBalance: [Function Ref B] } ---&gt; Closure (balance: 0)
+account2 ---&gt; { deposit: [Function Ref C], getBalance: [Function Ref D] } ---&gt; Closure (balance: 0)
+account3 ---&gt; { deposit: [Function Ref E], getBalance: [Function Ref F] } ---&gt; Closure (balance: 0)
+</code></pre></div></div>
+
+<p>If <code class="language-plaintext highlighter-rouge">deposit</code> contains 100 lines of logic, those 100 lines exist <strong>3 times</strong> in memory. With 10,000 instances, they exist 10,000 times.</p>
+
+<p>Classes solve this with the <strong>JavaScript prototype chain</strong>. When you define a class, its methods are created exactly once — on the class’s prototype object. Every instance created with <code class="language-plaintext highlighter-rouge">new</code> simply holds a lightweight reference pointing back to those shared methods.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">user1</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BankAccount</span><span class="p">();</span>
+<span class="kd">const</span> <span class="nx">user2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BankAccount</span><span class="p">();</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">user1</span><span class="p">.</span><span class="nx">deposit</span> <span class="o">===</span> <span class="nx">user2</span><span class="p">.</span><span class="nx">deposit</span><span class="p">);</span> <span class="c1">// true — same function object</span>
+</code></pre></div></div>
+
+<p>Memory heap with 3 instances using a class:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[ Heap Memory ]
+
+account1 ---&gt; { #balance: 0 } ---\
+account2 ---&gt; { #balance: 0 } ----&gt; [ BankAccount.prototype ] ---&gt; { deposit: [Single Fn], getBalance: [Single Fn] }
+account3 ---&gt; { #balance: 0 } ---/
+</code></pre></div></div>
+
+<p>No matter how many instances you create, the method logic exists exactly once. Every instance just holds a pointer to it.</p>
+
+<p><strong>This is the real reason classes exist at scale.</strong> Not syntax preference. Not OOP philosophy. Memory efficiency through the prototype chain.</p>
+
+<hr />
+
+<h2 id="javascript-classes-are-just-syntactic-sugar--you-can-do-the-same-with-functions">JavaScript Classes Are Just Syntactic Sugar — You Can Do the Same with Functions</h2>
+
+<p>This is the part that shows you understand JavaScript’s actual engine, not just its syntax.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">class</code> keyword is syntactic sugar. Under the hood, JavaScript has always been prototype-based — there are no "real" classes like Java or C++. Before 2015, developers achieved the same memory efficiency manually using constructor functions and <code class="language-plaintext highlighter-rouge">.prototype</code>:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">BankAccount</span><span class="p">(</span><span class="nx">initialBalance</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">_balance</span> <span class="o">=</span> <span class="nx">initialBalance</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// Methods on the prototype — shared across all instances in memory</span>
+<span class="nx">BankAccount</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">deposit</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">amount</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">_balance</span> <span class="o">+=</span> <span class="nx">amount</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">BankAccount</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">getBalance</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_balance</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="kd">const</span> <span class="nx">a</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BankAccount</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">b</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BankAccount</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">deposit</span> <span class="o">===</span> <span class="nx">b</span><span class="p">.</span><span class="nx">deposit</span><span class="p">);</span> <span class="c1">// true — same reference</span>
+</code></pre></div></div>
+
+<p>Same memory layout as a class. Methods defined once, shared via prototype.</p>
+
+<p>But notice the catch: to use prototype methods, internal state has to live on <code class="language-plaintext highlighter-rouge">this</code> — meaning <code class="language-plaintext highlighter-rouge">this._balance</code> is technically accessible from outside. You lose the strict privacy that closures give you.</p>
+
+<p>This is the core trade-off between functions and classes in JavaScript:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Approach</th>
+      <th>Data Privacy</th>
+      <th>Memory Efficiency</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Closure / Factory Function</td>
+      <td>✅ Absolute — closure scope</td>
+      <td>❌ New function copies per instance</td>
+    </tr>
+    <tr>
+      <td>Constructor + Prototype</td>
+      <td>❌ State exposed via <code class="language-plaintext highlighter-rouge">this</code></td>
+      <td>✅ Methods shared via prototype</td>
+    </tr>
+    <tr>
+      <td>ES6 Class with <code class="language-plaintext highlighter-rouge">#</code> fields</td>
+      <td>✅ True private fields</td>
+      <td>✅ Methods on prototype</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Modern ES6 classes with private fields (<code class="language-plaintext highlighter-rouge">#property</code>) are essentially the language finally letting you have both at the same time — true encapsulation <em>and</em> prototype-based memory efficiency. That’s the problem the <code class="language-plaintext highlighter-rouge">class</code> keyword actually solved.</p>
+
+<hr />
+
+<h2 id="the-django-story-why-function-based-views-came-first">The Django Story: Why Function-Based Views Came First</h2>
+
+<p>This same tension played out visibly in Django’s history — and it’s a useful real-world case study for the functions vs classes debate.</p>
+
+<p>Django originally started with only function-based views because they are simple and explicit: a function receives an HTTP request, does something, returns a response. Clean, readable, no ceremony.</p>
+
+<p>The problem wasn’t that functions were bad. The problem was <strong>repetition</strong>. A typical list view, a create view, a detail view — they all shared the same structural pattern: query the database, handle the request method, render a template, return a response. Writing that boilerplate from scratch for every view across a large application was tedious and error-prone.</p>
+
+<p>Class-based views, introduced in Django 1.3, brought inheritance to address this. Subclass <code class="language-plaintext highlighter-rouge">ListView</code>, override a couple of attributes, get a fully working paginated list view in two lines.</p>
+
+<p>But the criticism followed: the inheritance chains made implicit code flow harder to follow than the boilerplate they replaced. Django developers who preferred functions argued the complexity wasn’t a fair trade for the saved lines. It’s a debate that’s still active in the Django community today.</p>
+
+<p>Django’s evolution mirrors the broader argument perfectly: functions are simpler and more readable, classes offer reusability through inheritance — but that reusability comes with cognitive overhead.</p>
+
+<hr />
+
+<h2 id="why-react-moved-from-class-components-to-functional-components">Why React Moved from Class Components to Functional Components</h2>
+
+<p>React’s journey went in the opposite direction — starting with class components and moving back to functions — and it’s equally instructive.</p>
+
+<p>Early React required class components for any component that needed state or lifecycle methods. Functions were only for purely presentational components that received props and rendered HTML.</p>
+
+<p>The problems with React class components accumulated:</p>
+
+<ul>
+  <li>The <code class="language-plaintext highlighter-rouge">this</code> keyword behaved unpredictably — methods had to be manually bound in constructors</li>
+  <li>Logic for the same feature was split across <code class="language-plaintext highlighter-rouge">componentDidMount</code>, <code class="language-plaintext highlighter-rouge">componentDidUpdate</code>, and <code class="language-plaintext highlighter-rouge">componentWillUnmount</code></li>
+  <li>Sharing stateful logic between components required render props and higher-order components, creating deeply nested, hard-to-read trees</li>
+</ul>
+
+<p><strong>React Hooks</strong> solved this by bringing state and side effects into functions — without <code class="language-plaintext highlighter-rouge">this</code> binding issues and without splitting related logic across lifecycle methods. The same feature’s logic could now live together, in one plain function.</p>
+
+<p>The shift wasn’t because functions are fundamentally superior to classes. It was because for UI components with localised, short-lived state, <strong>functions with Hooks are dramatically cleaner for this specific use case.</strong></p>
+
+<hr />
+
+<h2 id="when-to-use-functions-vs-classes-in-javascript-a-practical-guide">When to Use Functions vs Classes in JavaScript: A Practical Guide</h2>
+
+<p>The answer isn’t a universal rule — it’s a set of questions to ask about what your code actually needs to do.</p>
+
+<p><strong>Use a function when:</strong></p>
+<ul>
+  <li>The logic is stateless — input goes in, output comes out, no memory between calls</li>
+  <li>You’re building UI components (functional components + hooks are the modern standard)</li>
+  <li>You want maximum composability — small pieces of logic combining into larger ones</li>
+  <li>You’re writing utility code, data transformations, or pure calculations</li>
+</ul>
+
+<p><strong>Use a class when:</strong></p>
+<ul>
+  <li>You need an entity that holds state across a long lifecycle — a database connection, an API client, a game object, a session</li>
+  <li>You’ll create many instances of the same thing and memory efficiency matters</li>
+  <li>You’re modelling a domain entity with behaviour — <code class="language-plaintext highlighter-rouge">ShoppingCart</code>, <code class="language-plaintext highlighter-rouge">UserSession</code>, <code class="language-plaintext highlighter-rouge">HttpClient</code></li>
+  <li>You’re working in a framework built around classes — NestJS, for example, uses classes and decorators as its core architectural pattern</li>
+</ul>
+
+<p>The mental shortcut: <strong>functions for actions, classes for things.</strong></p>
+
+<p>A function calculates tax, validates a form, fetches data. A class <em>is</em> a bank account, <em>is</em> an HTTP client, <em>is</em> a user session — something that persists, manages its own state, and has a lifecycle.</p>
+
+<hr />
+
+<h2 id="summary">Summary</h2>
+
+<p>The industry’s move toward functions isn’t a rejection of classes — it’s a recognition that most day-to-day code is stateless logic and UI rendering, where functions genuinely are the simpler tool.</p>
+
+<p>But when you need to create thousands of instances of something that holds state across a lifecycle, the prototype-based memory efficiency of classes is not a stylistic preference. It’s a practical necessity.</p>
+
+<p>Functions and classes aren’t competing paradigms. They’re complementary tools — each optimised for a different problem. Knowing which problem you’re solving is the skill.</p>
+
+<hr />
+
+<h2 id="frequently-asked-questions">Frequently Asked Questions</h2>
+
+<p><strong>What is the difference between a function and a class in JavaScript?</strong>
+A function is a reusable block of code that takes inputs and returns outputs. A class is a blueprint for creating objects that bundle state and behaviour together. The key technical difference is that class methods are shared across all instances via the prototype chain, while closure-based factory functions create new method copies for each instance.</p>
+
+<p><strong>When should you use a class instead of a function in JavaScript?</strong>
+Use a class when you need to create multiple instances of something that maintains its own state across a lifecycle — like a database connection, API client, or game entity. Classes are more memory-efficient at scale because methods are defined once on the prototype and shared across all instances.</p>
+
+<p><strong>Can JavaScript functions replace classes entirely?</strong>
+Technically yes — closures can encapsulate private state, and constructor functions can use prototypes for memory efficiency. But ES6 classes with private fields (<code class="language-plaintext highlighter-rouge">#</code>) combine both benefits cleanly. For long-lived, stateful entities created at scale, classes remain the pragmatic choice.</p>
+
+<p><strong>What is the JavaScript prototype chain?</strong>
+The prototype chain is JavaScript’s mechanism for sharing properties and methods between objects. Class methods are defined once on the constructor’s prototype. When an instance calls a method, JavaScript looks it up on the prototype rather than the instance itself — meaning the method exists in memory exactly once regardless of how many instances exist.</p>
+
+<p><strong>Why did React move from class components to functional components?</strong>
+Class components required manual <code class="language-plaintext highlighter-rouge">this</code> binding, split related logic across multiple lifecycle methods, and made stateful logic reuse awkward. React Hooks brought state and side effects into functional components cleanly, eliminating <code class="language-plaintext highlighter-rouge">this</code> issues and keeping related logic together.</p>
+
+<p><strong>Why did Django start with function-based views and add class-based views later?</strong>
+Django started with function-based views for their simplicity and explicitness. Class-based views were added in Django 1.3 to reduce repetitive boilerplate through inheritance. However, many experienced Django developers argue the inheritance chains introduced more cognitive complexity than the boilerplate savings justified.</p>
+
+<p><strong>What is the memory difference between closures and classes in JavaScript?</strong>
+With closure-based factory functions, each instance gets its own copy of every method — creating duplicate function objects in memory. With classes, methods are defined once on the prototype and referenced by all instances. For thousands of instances, classes are significantly more memory-efficient.</p>
+
+<hr />
+
+<p><em>Co-written with AI.</em></p>]]></content><author><name>Samrat Dutta Roy</name></author><category term="javascript" /><category term="typescript" /><category term="functions vs classes" /><category term="closures" /><category term="prototype chain" /><category term="OOP" /><category term="functional programming" /><category term="React hooks" /><category term="class components" /><category term="Django views" /><category term="memory efficiency" /><category term="software architecture" /><category term="javascript interview" /><summary type="html"><![CDATA[Should you use functions or classes in JavaScript? Modern frameworks lean heavily on functions — React moved to hooks, Django started function-first. So why do classes still exist? The answer lies in memory, the prototype chain, and what your code actually needs to do.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://dutta-roy-samrat.github.io/assets/images/functions-vs-classes.png" /><media:content medium="image" url="https://dutta-roy-samrat.github.io/assets/images/functions-vs-classes.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Why Does Changing DNS Fix High Ping in Valorant? The Real Technical Reason</title><link href="https://dutta-roy-samrat.github.io/posts/why-does-changing-dns-fix-high-ping-in-valorant-the-real-technical-reason/" rel="alternate" type="text/html" title="Why Does Changing DNS Fix High Ping in Valorant? The Real Technical Reason" /><published>2026-03-15T00:00:00+05:30</published><updated>2026-03-15T00:00:00+05:30</updated><id>https://dutta-roy-samrat.github.io/posts/why-does-changing-dns-fix-high-ping-in-valorant-the-real-technical-reason</id><content type="html" xml:base="https://dutta-roy-samrat.github.io/posts/why-does-changing-dns-fix-high-ping-in-valorant-the-real-technical-reason/"><![CDATA[<blockquote>
   <p><strong>Direct answer:</strong> Switching DNS (e.g. from Google’s 8.8.8.8 to Cloudflare’s 1.1.1.1) can fix Valorant ping spikes because different DNS servers resolve the game domain to different regional server IPs. Changing the destination IP forces your ISP to build a fresh network route — one that may bypass a congested or broken path that was causing the spike. It doesn’t always work, and spikes can happen on any DNS at any time.</p>
 </blockquote>
 
@@ -137,7 +420,7 @@ Because network routing is dynamic. A route that was congested an hour ago may b
 
 <hr />
 
-<p><em>Co-written with AI.</em></p>]]></content><author><name>Samrat Dutta Roy</name></author><category term="valorant high ping" /><category term="fix ping valorant" /><category term="dns ping fix" /><category term="cloudflare dns gaming" /><category term="google dns vs cloudflare" /><category term="anycast routing" /><category term="EDNS client subnet" /><category term="networking" /><category term="valorant lag fix" /><category term="dns 1.1.1.1 gaming" /><summary type="html"><![CDATA[Why does switching to Cloudflare DNS (1.1.1.1) or Google DNS (8.8.8.8) fix high ping in Valorant? It's not placebo — it's Anycast routing, EDNS Client Subnet, and how your ISP picks network paths. Here's the full technical explanation.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://dutta-roy-samrat.github.io/assets/images/dns-ping-valorant.png" /><media:content medium="image" url="https://dutta-roy-samrat.github.io/assets/images/dns-ping-valorant.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">What is UTF-8 Character Encoding? A Real Bug That Finally Made It Click</title><link href="https://dutta-roy-samrat.github.io/posts/what-is-utf-8-character-encoding-a-real-bug-that-finally-made-it-click/" rel="alternate" type="text/html" title="What is UTF-8 Character Encoding? A Real Bug That Finally Made It Click" /><published>2026-05-21T00:00:00+05:30</published><updated>2026-05-21T00:00:00+05:30</updated><id>https://dutta-roy-samrat.github.io/posts/what-is-utf-8-character-encoding-a-real-bug-that-finally-made-it-click</id><content type="html" xml:base="https://dutta-roy-samrat.github.io/posts/what-is-utf-8-character-encoding-a-real-bug-that-finally-made-it-click/"><![CDATA[<blockquote>
+<p><em>Co-written with AI.</em></p>]]></content><author><name>Samrat Dutta Roy</name></author><category term="valorant high ping" /><category term="fix ping valorant" /><category term="dns ping fix" /><category term="cloudflare dns gaming" /><category term="google dns vs cloudflare" /><category term="anycast routing" /><category term="EDNS client subnet" /><category term="networking" /><category term="valorant lag fix" /><category term="dns 1.1.1.1 gaming" /><summary type="html"><![CDATA[Why does switching to Cloudflare DNS (1.1.1.1) or Google DNS (8.8.8.8) fix high ping in Valorant? It's not placebo — it's Anycast routing, EDNS Client Subnet, and how your ISP picks network paths. Here's the full technical explanation.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://dutta-roy-samrat.github.io/assets/images/dns-ping-valorant.png" /><media:content medium="image" url="https://dutta-roy-samrat.github.io/assets/images/dns-ping-valorant.png" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">What is UTF-8 Character Encoding? A Real Bug That Finally Made It Click</title><link href="https://dutta-roy-samrat.github.io/posts/what-is-utf-8-character-encoding-a-real-bug-that-finally-made-it-click/" rel="alternate" type="text/html" title="What is UTF-8 Character Encoding? A Real Bug That Finally Made It Click" /><published>2026-02-18T00:00:00+05:30</published><updated>2026-02-18T00:00:00+05:30</updated><id>https://dutta-roy-samrat.github.io/posts/what-is-utf-8-character-encoding-a-real-bug-that-finally-made-it-click</id><content type="html" xml:base="https://dutta-roy-samrat.github.io/posts/what-is-utf-8-character-encoding-a-real-bug-that-finally-made-it-click/"><![CDATA[<blockquote>
   <p><strong>Direct answer:</strong> UTF-8 is a variable-width character encoding that converts Unicode code points into bytes. It uses 1 byte for ASCII characters, up to 4 bytes for emojis and rare symbols. It is the dominant encoding on the web because it is space-efficient, backward-compatible with ASCII, and can represent every character in existence.</p>
 </blockquote>
 
@@ -404,7 +687,7 @@ Excel on Windows defaults to a legacy encoding (like Windows-1252) when opening 
 
 <hr />
 
-<p><em>Co-written with AI.</em></p>]]></content><author><name>Samrat Dutta Roy</name></author><category term="utf-8" /><category term="character encoding" /><category term="unicode" /><category term="javascript" /><category term="csv export" /><category term="byte order mark" /><category term="BOM" /><category term="charset" /><category term="emoji encoding" /><category term="frontend" /><category term="debugging" /><summary type="html"><![CDATA[What is UTF-8 encoding and why does it matter? A real emoji bug in a CSV export — and two lines of code that fixed it — explains character encoding, Unicode, the Byte Order Mark, and why charset=utf-8 alone isn't always enough.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://dutta-roy-samrat.github.io/assets/images/utf8-encoding.webp" /><media:content medium="image" url="https://dutta-roy-samrat.github.io/assets/images/utf8-encoding.webp" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Is Node.js Single-Threaded? The Complete Answer Explained</title><link href="https://dutta-roy-samrat.github.io/posts/is-nodejs-single-threaded-the-complete-answer-explained/" rel="alternate" type="text/html" title="Is Node.js Single-Threaded? The Complete Answer Explained" /><published>2026-05-20T00:00:00+05:30</published><updated>2026-05-20T00:00:00+05:30</updated><id>https://dutta-roy-samrat.github.io/posts/is-nodejs-single-threaded-the-complete-answer-explained</id><content type="html" xml:base="https://dutta-roy-samrat.github.io/posts/is-nodejs-single-threaded-the-complete-answer-explained/"><![CDATA[<blockquote>
+<p><em>Co-written with AI.</em></p>]]></content><author><name>Samrat Dutta Roy</name></author><category term="utf-8" /><category term="character encoding" /><category term="unicode" /><category term="javascript" /><category term="csv export" /><category term="byte order mark" /><category term="BOM" /><category term="charset" /><category term="emoji encoding" /><category term="frontend" /><category term="debugging" /><summary type="html"><![CDATA[What is UTF-8 encoding and why does it matter? A real emoji bug in a CSV export — and two lines of code that fixed it — explains character encoding, Unicode, the Byte Order Mark, and why charset=utf-8 alone isn't always enough.]]></summary><media:thumbnail xmlns:media="http://search.yahoo.com/mrss/" url="https://dutta-roy-samrat.github.io/assets/images/utf8-encoding.webp" /><media:content medium="image" url="https://dutta-roy-samrat.github.io/assets/images/utf8-encoding.webp" xmlns:media="http://search.yahoo.com/mrss/" /></entry><entry><title type="html">Is Node.js Single-Threaded? The Complete Answer Explained</title><link href="https://dutta-roy-samrat.github.io/posts/is-nodejs-single-threaded-the-complete-answer-explained/" rel="alternate" type="text/html" title="Is Node.js Single-Threaded? The Complete Answer Explained" /><published>2026-01-20T00:00:00+05:30</published><updated>2026-01-20T00:00:00+05:30</updated><id>https://dutta-roy-samrat.github.io/posts/is-nodejs-single-threaded-the-complete-answer-explained</id><content type="html" xml:base="https://dutta-roy-samrat.github.io/posts/is-nodejs-single-threaded-the-complete-answer-explained/"><![CDATA[<blockquote>
   <p><strong>Direct answer:</strong> Node.js is neither purely single-threaded nor purely multi-threaded. JavaScript execution runs on a single main thread, but Node.js as a runtime uses multiple background threads via libuv for I/O operations. Worker Threads and the Cluster Module enable true parallelism when needed.</p>
 </blockquote>
 

@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Premium Custom Theme-Aware SVG Favicon (Notion Style) -->
+  <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><style>.bg{fill:%23111;}.txt{fill:%23fff;font-family:system-ui,-apple-system,sans-serif;font-weight:700;font-size:62px;}@media(prefers-color-scheme:dark){.bg{fill:%23fff;}.txt{fill:%23111;}}</style><rect width="100" height="100" rx="22" class="bg"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" class="txt">S</text></svg>'><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Functions vs Classes in JavaScript: When to Use Which and Why It Actually Matters | Samrat Dutta Roy Tech Blog</title>
+<meta name="generator" content="Jekyll v3.9.5" />
+<meta property="og:title" content="Functions vs Classes in JavaScript: When to Use Which and Why It Actually Matters" />
+<meta name="author" content="Samrat Dutta Roy" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Should you use functions or classes in JavaScript? Modern frameworks lean heavily on functions — React moved to hooks, Django started function-first. So why do classes still exist? The answer lies in memory, the prototype chain, and what your code actually needs to do." />
+<meta property="og:description" content="Should you use functions or classes in JavaScript? Modern frameworks lean heavily on functions — React moved to hooks, Django started function-first. So why do classes still exist? The answer lies in memory, the prototype chain, and what your code actually needs to do." />
+<link rel="canonical" href="https://dutta-roy-samrat.github.io/posts/functions-vs-classes-in-javascript-when-to-use-which-and-why-it-actually-matters/" />
+<meta property="og:url" content="https://dutta-roy-samrat.github.io/posts/functions-vs-classes-in-javascript-when-to-use-which-and-why-it-actually-matters/" />
+<meta property="og:site_name" content="Samrat Dutta Roy Tech Blog" />
+<meta property="og:image" content="https://dutta-roy-samrat.github.io/assets/images/functions-vs-classes.png" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2026-05-23T00:00:00+05:30" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta property="twitter:image" content="https://dutta-roy-samrat.github.io/assets/images/functions-vs-classes.png" />
+<meta property="twitter:title" content="Functions vs Classes in JavaScript: When to Use Which and Why It Actually Matters" />
+<meta name="twitter:site" content="@" />
+<meta name="twitter:creator" content="@Samrat Dutta Roy" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BlogPosting","author":{"@type":"Person","name":"Samrat Dutta Roy"},"dateModified":"2026-05-23T00:00:00+05:30","datePublished":"2026-05-23T00:00:00+05:30","description":"Should you use functions or classes in JavaScript? Modern frameworks lean heavily on functions — React moved to hooks, Django started function-first. So why do classes still exist? The answer lies in memory, the prototype chain, and what your code actually needs to do.","headline":"Functions vs Classes in JavaScript: When to Use Which and Why It Actually Matters","image":"https://dutta-roy-samrat.github.io/assets/images/functions-vs-classes.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://dutta-roy-samrat.github.io/posts/functions-vs-classes-in-javascript-when-to-use-which-and-why-it-actually-matters/"},"url":"https://dutta-roy-samrat.github.io/posts/functions-vs-classes-in-javascript-when-to-use-which-and-why-it-actually-matters/"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <meta name="keywords" content="samrat dutta roy, dev blog, web performance, software engineering, frontend development, browser internals, javascript, system design">
+  
+  <link rel="stylesheet" href="/assets/main.css?v=20260523110812"><link type="application/atom+xml" rel="alternate" href="https://dutta-roy-samrat.github.io/feed.xml" title="Samrat Dutta Roy | Tech Blog" /><link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script data-goatcounter="https://xcanor.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+  <!-- Anti-FOUC Theme Init & Scroll Restoration Stabilizer -->
+  <script>
+    (function() {
+      // 1. Anti-FOUC Theme Initialization
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : (prefersDark ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+
+      // 2. Scroll Restoration Stabilizer (Prevents page jitter & early scroll clamping on refresh)
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+
+      // Save scroll position on scroll (throttled) and pagehide
+      let scrollTimeout;
+      window.addEventListener('scroll', () => {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+          sessionStorage.setItem('scroll_pos_' + location.pathname, window.scrollY);
+        }, 150);
+      });
+
+      window.addEventListener('pagehide', () => {
+        sessionStorage.setItem('scroll_pos_' + location.pathname, window.scrollY);
+      });
+
+      function restoreScroll() {
+        const scrollPos = sessionStorage.getItem('scroll_pos_' + location.pathname);
+        if (scrollPos) {
+          window.scrollTo(0, parseInt(scrollPos, 10));
+        }
+      }
+
+      // Restore position at DOMContentLoaded (before paint) and window load (failsafe)
+      document.addEventListener('DOMContentLoaded', restoreScroll);
+      window.addEventListener('load', restoreScroll);
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- Top Sticky Navigation / Breadcrumbs -->
+  <header class="notion-navbar">
+    <div class="notion-navbar-container">
+      <div class="notion-breadcrumbs">
+        <a href="/" class="crumb-link mobile-hide">
+          <span class="crumb">📂 Samrat Dutta Roy</span>
+        </a>
+        
+          <span class="divider mobile-hide">/</span>
+          <span class="crumb text-muted mobile-hide">📝 Posts</span>
+          <span class="divider mobile-hide">/</span>
+          <span class="crumb current-page">Functions vs Classes in JavaScript: When to Use Which and Why It Actually Matters</span>
+        
+      </div>
+      
+      <div class="notion-nav-actions">
+        <a href="/" class="nav-link">Home</a>
+        <a href="https://github.com/dutta-roy-samrat" target="_blank" rel="noopener noreferrer" class="nav-link">GitHub</a>
+        <a href="https://linkedin.com/in/samrat-dutta-roy-032a86194" target="_blank" rel="noopener noreferrer" class="nav-link">LinkedIn</a>
+        <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme">
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notion Cover Banner -->
+  <div class="notion-cover-wrapper" id="notion-cover-wrapper">
+    
+      <img src="/assets/images/notion-cover.png" class="notion-cover-img" alt="Cover banner" loading="lazy">
+    
+    <canvas id="mario-canvas" class="mario-canvas"></canvas>
+    <div id="mario-play-hint" class="mario-play-hint">🎮 Click / Space to Play Game</div>
+    <div class="mario-controls">
+      <button id="mario-btn-start" class="mario-btn">🎮 Play Game</button>
+      <button id="mario-btn-stop" class="mario-btn">⏹️ Stop Game</button>
+    </div>
+  </div>
+
+  <!-- Main Content Container -->
+  <div class="notion-container">
+
+    <main class="notion-content-area" aria-label="Content">
+      <article class="notion-post">
+  <!-- Post Title -->
+  <h1 class="notion-post-title">Functions vs Classes in JavaScript: When to Use Which and Why It Actually Matters</h1>
+  
+  <!-- Notion Page Properties Grid -->
+  <div class="notion-properties-grid">
+    <!-- Date Property -->
+    <div class="notion-property-row">
+      <div class="notion-property-label">
+        <svg viewBox="0 0 24 24" class="property-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        Date
+      </div>
+      <div class="notion-property-value">
+        <span class="property-date">May 23, 2026</span>
+      </div>
+    </div>
+    
+    <!-- Tags Property -->
+    
+    <div class="notion-property-row">
+      <div class="notion-property-label">
+        <svg viewBox="0 0 24 24" class="property-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+          <line x1="7" y1="7" x2="7.01" y2="7"></line>
+        </svg>
+        Tags
+      </div>
+      <div class="notion-property-value">
+        <div class="notion-tags-container">
+          
+            
+            
+            
+            <span class="notion-tag pastel-yellow">javascript</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-gray">typescript</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-gray">functions vs classes</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-gray">closures</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-gray">prototype chain</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-gray">OOP</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-gray">functional programming</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-gray">React hooks</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-gray">class components</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-gray">Django views</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-gray">memory efficiency</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-purple">software architecture</span>
+          
+            
+            
+            
+            <span class="notion-tag pastel-yellow">javascript interview</span>
+          
+        </div>
+      </div>
+    </div>
+    
+    
+    <!-- Author Property -->
+    <div class="notion-property-row">
+      <div class="notion-property-label">
+        <svg viewBox="0 0 24 24" class="property-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        Author
+      </div>
+      <div class="notion-property-value">
+        <span class="property-author">Samrat Dutta Roy</span>
+      </div>
+    </div>
+    
+    <!-- Status Property -->
+    <div class="notion-property-row">
+      <div class="notion-property-label">
+        <svg viewBox="0 0 24 24" class="property-icon" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+        Status
+      </div>
+      <div class="notion-property-value">
+        <span class="notion-tag pastel-green font-medium">Published</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="notion-property-divider"></div>
+  
+  <!-- Post Content -->
+  <div class="notion-post-content">
+    <blockquote>
+  <p><strong>Direct answer:</strong> Functions and classes are not competing tools — they solve different problems. Functions excel at stateless logic, composition, and modern UI patterns. Classes excel at encapsulating long-lived state, modelling domain entities, and memory-efficient instantiation at scale. The difference comes down to how JavaScript manages memory through the prototype chain, and what your specific use case actually demands.</p>
+</blockquote>
+
+<p>Look at modern software development and a pattern is hard to miss.</p>
+
+<p><strong>React</strong> — the most widely used frontend framework — moved decisively away from class components toward <strong>functional components with Hooks</strong>. The community followed without much resistance.</p>
+
+<p><strong>Django</strong> — one of the most battle-tested backend frameworks in existence — started with only function-based views. Class-based views came later, and to this day a vocal segment of experienced Django developers argue the tradeoff wasn’t worth it — that the inheritance chains made code harder to follow than the boilerplate they replaced.</p>
+
+<p><strong>JavaScript itself</strong> has been trending toward functional patterns for years. Closures, higher-order functions, <code class="language-plaintext highlighter-rouge">map</code>, <code class="language-plaintext highlighter-rouge">filter</code>, <code class="language-plaintext highlighter-rouge">reduce</code> — these are the idioms that define modern JS.</p>
+
+<p>So the reasonable question to ask is: <strong>if functions vs classes is a debate, and functions keep winning in practice — why do classes still exist at all?</strong></p>
+
+<p>The answer isn’t that classes are legacy code waiting to be deprecated. It’s that functions and classes solve genuinely different problems — and understanding which problem each solves requires going a level deeper than syntax.</p>
+
+<hr />
+
+<h2 id="what-is-the-difference-between-a-function-and-a-class-in-javascript">What Is the Difference Between a Function and a Class in JavaScript?</h2>
+
+<p>Ask most developers and you’ll get the standard answer: classes are for <strong>encapsulation</strong> and <strong>abstraction</strong> — bundling state and behaviour together, hiding internal details, modelling real-world entities.</p>
+
+<p>Functions are more <strong>flexible</strong> and <strong>composable</strong> — great for pure logic, transformations, utility work.</p>
+
+<p>That’s not wrong. But it’s incomplete. Because the obvious follow-up is: <em>can’t functions do encapsulation too?</em></p>
+
+<p>Yes. They can. And that’s where things get interesting.</p>
+
+<hr />
+
+<h2 id="can-functions-replace-classes-closures-and-encapsulation-explained">Can Functions Replace Classes? Closures and Encapsulation Explained</h2>
+
+<p>Before ES6 introduced the <code class="language-plaintext highlighter-rouge">class</code> keyword in 2015, JavaScript had no native class syntax. Developers who needed encapsulation and private state used <strong>closures</strong> — functions that trap variables inside their lexical scope and expose only what they choose to expose.</p>
+
+<p>Here’s the same bank account implemented two ways:</p>
+
+<p><strong>The Class approach:</strong></p>
+
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nx">BankAccount</span> <span class="p">{</span>
+  <span class="err">#</span><span class="nx">balance</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// # makes it a truly private field</span>
+
+  <span class="nx">deposit</span><span class="p">(</span><span class="nx">amount</span><span class="p">:</span> <span class="kr">number</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="err">#</span><span class="nx">balance</span> <span class="o">+=</span> <span class="nx">amount</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="nx">getBalance</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="err">#</span><span class="nx">balance</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><strong>The Closure / Factory Function approach:</strong></p>
+
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">createBankAccount</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">let</span> <span class="nx">balance</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// Trapped in the closure — inaccessible from outside</span>
+
+  <span class="k">return</span> <span class="p">{</span>
+    <span class="nx">deposit</span><span class="p">(</span><span class="na">amount</span><span class="p">:</span> <span class="kr">number</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">balance</span> <span class="o">+=</span> <span class="nx">amount</span><span class="p">;</span>
+    <span class="p">},</span>
+    <span class="nx">getBalance</span><span class="p">()</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nx">balance</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">};</span>
+<span class="p">}</span>
+
+<span class="kd">const</span> <span class="nx">account</span> <span class="o">=</span> <span class="nx">createBankAccount</span><span class="p">();</span>
+<span class="nx">account</span><span class="p">.</span><span class="nx">deposit</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">account</span><span class="p">.</span><span class="nx">getBalance</span><span class="p">());</span> <span class="c1">// 100</span>
+<span class="c1">// balance is completely inaccessible from outside</span>
+</code></pre></div></div>
+
+<p>Both achieve the same result. Both hide internal state. Both expose only controlled methods.</p>
+
+<p>So again — why do classes exist?</p>
+
+<hr />
+
+<h2 id="the-real-difference-memory-allocation-and-the-javascript-prototype-chain">The Real Difference: Memory Allocation and the JavaScript Prototype Chain</h2>
+
+<p>This is where most explanations stop being vague and start being precise.</p>
+
+<p>When you use the factory function approach, JavaScript creates a <strong>new set of function definitions in memory every single time</strong> you call <code class="language-plaintext highlighter-rouge">createBankAccount</code>. Each instance gets its own copy of <code class="language-plaintext highlighter-rouge">deposit</code> and <code class="language-plaintext highlighter-rouge">getBalance</code> — distinct function objects, each allocated separately in the heap.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">account1</span> <span class="o">=</span> <span class="nx">createBankAccount</span><span class="p">();</span>
+<span class="kd">const</span> <span class="nx">account2</span> <span class="o">=</span> <span class="nx">createBankAccount</span><span class="p">();</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">account1</span><span class="p">.</span><span class="nx">deposit</span> <span class="o">===</span> <span class="nx">account2</span><span class="p">.</span><span class="nx">deposit</span><span class="p">);</span> <span class="c1">// false — different function objects</span>
+</code></pre></div></div>
+
+<p>Here’s what the memory heap actually looks like with 3 instances:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[ Heap Memory ]
+
+account1 ---&gt; { deposit: [Function Ref A], getBalance: [Function Ref B] } ---&gt; Closure (balance: 0)
+account2 ---&gt; { deposit: [Function Ref C], getBalance: [Function Ref D] } ---&gt; Closure (balance: 0)
+account3 ---&gt; { deposit: [Function Ref E], getBalance: [Function Ref F] } ---&gt; Closure (balance: 0)
+</code></pre></div></div>
+
+<p>If <code class="language-plaintext highlighter-rouge">deposit</code> contains 100 lines of logic, those 100 lines exist <strong>3 times</strong> in memory. With 10,000 instances, they exist 10,000 times.</p>
+
+<p>Classes solve this with the <strong>JavaScript prototype chain</strong>. When you define a class, its methods are created exactly once — on the class’s prototype object. Every instance created with <code class="language-plaintext highlighter-rouge">new</code> simply holds a lightweight reference pointing back to those shared methods.</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">user1</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BankAccount</span><span class="p">();</span>
+<span class="kd">const</span> <span class="nx">user2</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BankAccount</span><span class="p">();</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">user1</span><span class="p">.</span><span class="nx">deposit</span> <span class="o">===</span> <span class="nx">user2</span><span class="p">.</span><span class="nx">deposit</span><span class="p">);</span> <span class="c1">// true — same function object</span>
+</code></pre></div></div>
+
+<p>Memory heap with 3 instances using a class:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[ Heap Memory ]
+
+account1 ---&gt; { #balance: 0 } ---\
+account2 ---&gt; { #balance: 0 } ----&gt; [ BankAccount.prototype ] ---&gt; { deposit: [Single Fn], getBalance: [Single Fn] }
+account3 ---&gt; { #balance: 0 } ---/
+</code></pre></div></div>
+
+<p>No matter how many instances you create, the method logic exists exactly once. Every instance just holds a pointer to it.</p>
+
+<p><strong>This is the real reason classes exist at scale.</strong> Not syntax preference. Not OOP philosophy. Memory efficiency through the prototype chain.</p>
+
+<hr />
+
+<h2 id="javascript-classes-are-just-syntactic-sugar--you-can-do-the-same-with-functions">JavaScript Classes Are Just Syntactic Sugar — You Can Do the Same with Functions</h2>
+
+<p>This is the part that shows you understand JavaScript’s actual engine, not just its syntax.</p>
+
+<p>The <code class="language-plaintext highlighter-rouge">class</code> keyword is syntactic sugar. Under the hood, JavaScript has always been prototype-based — there are no "real" classes like Java or C++. Before 2015, developers achieved the same memory efficiency manually using constructor functions and <code class="language-plaintext highlighter-rouge">.prototype</code>:</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">BankAccount</span><span class="p">(</span><span class="nx">initialBalance</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">_balance</span> <span class="o">=</span> <span class="nx">initialBalance</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// Methods on the prototype — shared across all instances in memory</span>
+<span class="nx">BankAccount</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">deposit</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">amount</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">this</span><span class="p">.</span><span class="nx">_balance</span> <span class="o">+=</span> <span class="nx">amount</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">BankAccount</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">getBalance</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">this</span><span class="p">.</span><span class="nx">_balance</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="kd">const</span> <span class="nx">a</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BankAccount</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">b</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BankAccount</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+
+<span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">a</span><span class="p">.</span><span class="nx">deposit</span> <span class="o">===</span> <span class="nx">b</span><span class="p">.</span><span class="nx">deposit</span><span class="p">);</span> <span class="c1">// true — same reference</span>
+</code></pre></div></div>
+
+<p>Same memory layout as a class. Methods defined once, shared via prototype.</p>
+
+<p>But notice the catch: to use prototype methods, internal state has to live on <code class="language-plaintext highlighter-rouge">this</code> — meaning <code class="language-plaintext highlighter-rouge">this._balance</code> is technically accessible from outside. You lose the strict privacy that closures give you.</p>
+
+<p>This is the core trade-off between functions and classes in JavaScript:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Approach</th>
+      <th>Data Privacy</th>
+      <th>Memory Efficiency</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Closure / Factory Function</td>
+      <td>✅ Absolute — closure scope</td>
+      <td>❌ New function copies per instance</td>
+    </tr>
+    <tr>
+      <td>Constructor + Prototype</td>
+      <td>❌ State exposed via <code class="language-plaintext highlighter-rouge">this</code></td>
+      <td>✅ Methods shared via prototype</td>
+    </tr>
+    <tr>
+      <td>ES6 Class with <code class="language-plaintext highlighter-rouge">#</code> fields</td>
+      <td>✅ True private fields</td>
+      <td>✅ Methods on prototype</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Modern ES6 classes with private fields (<code class="language-plaintext highlighter-rouge">#property</code>) are essentially the language finally letting you have both at the same time — true encapsulation <em>and</em> prototype-based memory efficiency. That’s the problem the <code class="language-plaintext highlighter-rouge">class</code> keyword actually solved.</p>
+
+<hr />
+
+<h2 id="the-django-story-why-function-based-views-came-first">The Django Story: Why Function-Based Views Came First</h2>
+
+<p>This same tension played out visibly in Django’s history — and it’s a useful real-world case study for the functions vs classes debate.</p>
+
+<p>Django originally started with only function-based views because they are simple and explicit: a function receives an HTTP request, does something, returns a response. Clean, readable, no ceremony.</p>
+
+<p>The problem wasn’t that functions were bad. The problem was <strong>repetition</strong>. A typical list view, a create view, a detail view — they all shared the same structural pattern: query the database, handle the request method, render a template, return a response. Writing that boilerplate from scratch for every view across a large application was tedious and error-prone.</p>
+
+<p>Class-based views, introduced in Django 1.3, brought inheritance to address this. Subclass <code class="language-plaintext highlighter-rouge">ListView</code>, override a couple of attributes, get a fully working paginated list view in two lines.</p>
+
+<p>But the criticism followed: the inheritance chains made implicit code flow harder to follow than the boilerplate they replaced. Django developers who preferred functions argued the complexity wasn’t a fair trade for the saved lines. It’s a debate that’s still active in the Django community today.</p>
+
+<p>Django’s evolution mirrors the broader argument perfectly: functions are simpler and more readable, classes offer reusability through inheritance — but that reusability comes with cognitive overhead.</p>
+
+<hr />
+
+<h2 id="why-react-moved-from-class-components-to-functional-components">Why React Moved from Class Components to Functional Components</h2>
+
+<p>React’s journey went in the opposite direction — starting with class components and moving back to functions — and it’s equally instructive.</p>
+
+<p>Early React required class components for any component that needed state or lifecycle methods. Functions were only for purely presentational components that received props and rendered HTML.</p>
+
+<p>The problems with React class components accumulated:</p>
+
+<ul>
+  <li>The <code class="language-plaintext highlighter-rouge">this</code> keyword behaved unpredictably — methods had to be manually bound in constructors</li>
+  <li>Logic for the same feature was split across <code class="language-plaintext highlighter-rouge">componentDidMount</code>, <code class="language-plaintext highlighter-rouge">componentDidUpdate</code>, and <code class="language-plaintext highlighter-rouge">componentWillUnmount</code></li>
+  <li>Sharing stateful logic between components required render props and higher-order components, creating deeply nested, hard-to-read trees</li>
+</ul>
+
+<p><strong>React Hooks</strong> solved this by bringing state and side effects into functions — without <code class="language-plaintext highlighter-rouge">this</code> binding issues and without splitting related logic across lifecycle methods. The same feature’s logic could now live together, in one plain function.</p>
+
+<p>The shift wasn’t because functions are fundamentally superior to classes. It was because for UI components with localised, short-lived state, <strong>functions with Hooks are dramatically cleaner for this specific use case.</strong></p>
+
+<hr />
+
+<h2 id="when-to-use-functions-vs-classes-in-javascript-a-practical-guide">When to Use Functions vs Classes in JavaScript: A Practical Guide</h2>
+
+<p>The answer isn’t a universal rule — it’s a set of questions to ask about what your code actually needs to do.</p>
+
+<p><strong>Use a function when:</strong></p>
+<ul>
+  <li>The logic is stateless — input goes in, output comes out, no memory between calls</li>
+  <li>You’re building UI components (functional components + hooks are the modern standard)</li>
+  <li>You want maximum composability — small pieces of logic combining into larger ones</li>
+  <li>You’re writing utility code, data transformations, or pure calculations</li>
+</ul>
+
+<p><strong>Use a class when:</strong></p>
+<ul>
+  <li>You need an entity that holds state across a long lifecycle — a database connection, an API client, a game object, a session</li>
+  <li>You’ll create many instances of the same thing and memory efficiency matters</li>
+  <li>You’re modelling a domain entity with behaviour — <code class="language-plaintext highlighter-rouge">ShoppingCart</code>, <code class="language-plaintext highlighter-rouge">UserSession</code>, <code class="language-plaintext highlighter-rouge">HttpClient</code></li>
+  <li>You’re working in a framework built around classes — NestJS, for example, uses classes and decorators as its core architectural pattern</li>
+</ul>
+
+<p>The mental shortcut: <strong>functions for actions, classes for things.</strong></p>
+
+<p>A function calculates tax, validates a form, fetches data. A class <em>is</em> a bank account, <em>is</em> an HTTP client, <em>is</em> a user session — something that persists, manages its own state, and has a lifecycle.</p>
+
+<hr />
+
+<h2 id="summary">Summary</h2>
+
+<p>The industry’s move toward functions isn’t a rejection of classes — it’s a recognition that most day-to-day code is stateless logic and UI rendering, where functions genuinely are the simpler tool.</p>
+
+<p>But when you need to create thousands of instances of something that holds state across a lifecycle, the prototype-based memory efficiency of classes is not a stylistic preference. It’s a practical necessity.</p>
+
+<p>Functions and classes aren’t competing paradigms. They’re complementary tools — each optimised for a different problem. Knowing which problem you’re solving is the skill.</p>
+
+<hr />
+
+<h2 id="frequently-asked-questions">Frequently Asked Questions</h2>
+
+<p><strong>What is the difference between a function and a class in JavaScript?</strong>
+A function is a reusable block of code that takes inputs and returns outputs. A class is a blueprint for creating objects that bundle state and behaviour together. The key technical difference is that class methods are shared across all instances via the prototype chain, while closure-based factory functions create new method copies for each instance.</p>
+
+<p><strong>When should you use a class instead of a function in JavaScript?</strong>
+Use a class when you need to create multiple instances of something that maintains its own state across a lifecycle — like a database connection, API client, or game entity. Classes are more memory-efficient at scale because methods are defined once on the prototype and shared across all instances.</p>
+
+<p><strong>Can JavaScript functions replace classes entirely?</strong>
+Technically yes — closures can encapsulate private state, and constructor functions can use prototypes for memory efficiency. But ES6 classes with private fields (<code class="language-plaintext highlighter-rouge">#</code>) combine both benefits cleanly. For long-lived, stateful entities created at scale, classes remain the pragmatic choice.</p>
+
+<p><strong>What is the JavaScript prototype chain?</strong>
+The prototype chain is JavaScript’s mechanism for sharing properties and methods between objects. Class methods are defined once on the constructor’s prototype. When an instance calls a method, JavaScript looks it up on the prototype rather than the instance itself — meaning the method exists in memory exactly once regardless of how many instances exist.</p>
+
+<p><strong>Why did React move from class components to functional components?</strong>
+Class components required manual <code class="language-plaintext highlighter-rouge">this</code> binding, split related logic across multiple lifecycle methods, and made stateful logic reuse awkward. React Hooks brought state and side effects into functional components cleanly, eliminating <code class="language-plaintext highlighter-rouge">this</code> issues and keeping related logic together.</p>
+
+<p><strong>Why did Django start with function-based views and add class-based views later?</strong>
+Django started with function-based views for their simplicity and explicitness. Class-based views were added in Django 1.3 to reduce repetitive boilerplate through inheritance. However, many experienced Django developers argue the inheritance chains introduced more cognitive complexity than the boilerplate savings justified.</p>
+
+<p><strong>What is the memory difference between closures and classes in JavaScript?</strong>
+With closure-based factory functions, each instance gets its own copy of every method — creating duplicate function objects in memory. With classes, methods are defined once on the prototype and referenced by all instances. For thousands of instances, classes are significantly more memory-efficient.</p>
+
+<hr />
+
+<p><em>Co-written with AI.</em></p>
+
+  </div>
+</article>
+
+    </main>
+    
+    <!-- Footer -->
+    <footer class="notion-footer">
+      <div class="footer-divider"></div>
+      <div class="footer-content">
+        <p class="footer-left">© 2026 Samrat Dutta Roy. Built in Notion style.</p>
+        <div class="footer-right">
+          <a href="https://github.com/dutta-roy-samrat" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="https://linkedin.com/in/samrat-dutta-roy-032a86194" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Deferred External Scripts for Caching & Performance -->
+  <script src="/assets/js/theme.js" defer></script>
+  <script src="/assets/js/mario.js" defer></script>
+</body>
+</html>

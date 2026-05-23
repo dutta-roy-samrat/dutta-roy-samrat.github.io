@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Why Does Changing DNS Fix High Ping in Valorant? The Real Technical Reason"
-date: 2026-05-22
+date: 2026-03-15
 author: Samrat Dutta Roy
 emoji: "🌐"
 tags:

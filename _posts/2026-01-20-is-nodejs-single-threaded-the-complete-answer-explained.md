@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Is Node.js Single-Threaded? The Complete Answer Explained"
-date: 2026-05-20
+date: 2026-01-20
 author: Samrat Dutta Roy
 emoji: "⚡"
 tags: [nodejs, single-threaded, event loop, libuv, worker threads, cluster module, backend, javascript, node.js architecture, interview questions]
